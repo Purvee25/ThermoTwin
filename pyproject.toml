@@ -1,0 +1,42 @@
+[project]
+name = "thermotwin"
+version = "0.1.0"
+description = "Medication-aware hypertension digital twin that predicts heat-triggered crises"
+readme = "README.md"
+authors = [
+    { name = "Purvee Singh", email = "162358925+Purvee25@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "pythermalcomfort>=4.6.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.8",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "thermotwin.ectemp.ECTempParams",
+    "thermotwin.medication.BetaBlockerPrior",
+    "thermotwin.simulator.HeatDay",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
