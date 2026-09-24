@@ -1,5 +1,5 @@
-beta_blocker,estimator,patients,rmse_c,bias_c,danger_minutes,missed_danger_minutes,missed_danger_pct
-False,ECTemp (HR only),29,0.181,0.009,3514,396,11.269
-False,ThermoTwin (medication-aware),29,0.181,0.009,3514,396,11.269
-True,ECTemp (HR only),31,0.524,-0.518,3305,3223,97.519
-True,ThermoTwin (medication-aware),31,0.234,-0.037,3305,865,26.172
+beta_blocker,estimator,patients,rmse_c,bias_c,danger_minutes,missed_danger_minutes,false_alarm_minutes,missed_danger_pct
+False,ECTemp (HR only),29,0.181,0.009,3514,226,2576,6.431
+False,ThermoTwin (medication-aware),29,0.181,0.009,3514,226,2576,6.431
+True,ECTemp (HR only),31,0.524,-0.518,3305,3151,0,95.34
+True,ThermoTwin (medication-aware),31,0.234,-0.037,3305,482,3285,14.584

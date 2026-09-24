@@ -1,0 +1,3 @@
+estimator,rmse_c,bias_c,danger_sensitivity,false_alarm_rate
+ECTemp (HR only),0.626,-0.482,0.179,0.0
+ThermoTwin (medication-aware),0.389,-0.197,0.617,0.083

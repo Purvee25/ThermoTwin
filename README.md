@@ -24,17 +24,42 @@ uv run python -m thermotwin.ablation --patients 60
 
 The ablation writes `reports/ablation_summary.csv` and `reports/ablation_beta_blocker.png`.
 
-## Current result: medication-aware correction (synthetic cohort, 60 patients, seed 42)
+## Headline result: real heat-trial data (PROSPIE, 22 participants, 99 trials)
 
-| Group | Estimator | Core-temp RMSE | Bias | Danger minutes missed (≥38.0 °C) |
+**1. ECTemp validation.** On real rectal temperature, our ECTemp gives RMSE **0.32 °C**, in line
+with the published ~0.3 °C. Adding skin temperature barely helps (0.31 °C, participant-held-out
+CV), so we don't claim it.
+
+**2. Beta-blocker ablation on real data.** Real heart rate and core temperature, with a hidden
+beta-blocker response applied to heart rate only:
+
+| Estimator | RMSE | Bias | Danger minutes caught (≥38 °C) | False-alarm rate |
 |---|---|---|---|---|
-| No beta-blocker | ECTemp / ThermoTwin (identical) | 0.18 °C | +0.01 °C | 11% |
-| On beta-blocker | ECTemp (HR only) | 0.52 °C | −0.52 °C | 98% |
-| On beta-blocker | **ThermoTwin (medication-aware)** | **0.23 °C** | **−0.04 °C** | **26%** |
+| ECTemp (HR only) | 0.63 °C | −0.48 °C | 18% | 0% |
+| **ThermoTwin (medication-aware)** | **0.39 °C** | **−0.20 °C** | **62%** | **8%** |
 
-Across seeds 7, 42 and 123 the RMSE reduction is consistent (about 55–60%). The reduction in
-missed danger minutes varies more (twin misses 26–62%). Adding skin temperature and WBGT to the
-filter is the next step.
+Reproduce (the data is CC BY-NC 4.0 and not committed):
+
+```bash
+uv run python -m thermotwin.prospie --download
+uv run python -m thermotwin.fusion
+uv run python -m thermotwin.real_ablation
+```
+
+Alerts fire when the estimate's upper bound (mean + 1 SD) reaches 38 °C. PROSPIE
+participants are healthy volunteers, so the drug effect is simulated. A trial with real
+beta-blocker users would be the next validation step.
+
+## Simulated cohort (60 patients, seed 42)
+
+| Group | Estimator | Core-temp RMSE | Bias | Danger missed | False-alarm minutes |
+|---|---|---|---|---|---|
+| No beta-blocker | ECTemp / ThermoTwin (identical) | 0.18 °C | +0.01 °C | 6% | 2,576 |
+| On beta-blocker | ECTemp (HR only) | 0.52 °C | −0.52 °C | 95% | 0 |
+| On beta-blocker | **ThermoTwin** | **0.23 °C** | **−0.04 °C** | **15%** | 3,285 |
+
+The simulator is easier than reality (0.18 °C vs 0.32 °C on real data), so treat the real-data
+results above as the headline numbers.
 
 ![Ablation](reports/ablation_beta_blocker.png)
 
@@ -61,8 +86,8 @@ filter is the next step.
 ## Roadmap
 
 - [x] Core-temperature filter, medication correction, ground-truth simulator, ablation
-- [ ] Fuse skin temperature and WBGT into the filter (Tier 2) and a no-wearable Tier 0 model
-- [ ] Real-data validation on PROSPIE
+- [ ] Reduce false alarms; no-wearable Tier 0 model (skin fusion tested: negligible gain)
+- [x] Real-data validation and beta-blocker ablation on PROSPIE
 - [ ] Synthea cohort with a custom beta-blocker module, exported as FHIR
 - [ ] Real heatwave replay from Open-Meteo historical weather
 - [ ] 60-minute forecast (XGBoost on physics residuals) with conformal intervals

@@ -23,6 +23,7 @@ from thermotwin.medication import twin_core_temperature
 from thermotwin.simulator import PRE_SHIFT_REST_MIN, simulate_shift
 
 DANGER_CORE_C = 38.0
+ALERT_Z = 1.0
 REPORTS_DIR = Path("reports")
 
 
@@ -32,17 +33,25 @@ class EstimateMetrics:
     bias: float
     danger_minutes: int
     missed_danger_minutes: int
+    false_alarm_minutes: int
 
 
-def score(true_core: np.ndarray, estimate: np.ndarray) -> EstimateMetrics:
-    """Error metrics for one shift, excluding the pre-shift rest period."""
-    truth, est = true_core[PRE_SHIFT_REST_MIN:], estimate[PRE_SHIFT_REST_MIN:]
+def score(true_core: np.ndarray, estimate: np.ndarray, variance: np.ndarray) -> EstimateMetrics:
+    """Error and alert metrics for one shift, excluding the pre-shift rest period.
+
+    An alert fires when the estimate's upper bound (mean + ALERT_Z * sd) reaches the
+    danger threshold, so wider uncertainty makes the twin more cautious.
+    """
+    rest = PRE_SHIFT_REST_MIN
+    truth, est = true_core[rest:], estimate[rest:]
+    alert = est + ALERT_Z * np.sqrt(variance[rest:]) >= DANGER_CORE_C
     danger = truth >= DANGER_CORE_C
     return EstimateMetrics(
         rmse=float(np.sqrt(np.mean((est - truth) ** 2))),
         bias=float(np.mean(est - truth)),
         danger_minutes=int(danger.sum()),
-        missed_danger_minutes=int((danger & (est < DANGER_CORE_C)).sum()),
+        missed_danger_minutes=int((danger & ~alert).sum()),
+        false_alarm_minutes=int((~danger & alert).sum()),
     )
 
 
@@ -51,15 +60,15 @@ def evaluate_patient(patient: Patient, seed: int) -> list[dict]:
     truth = shift["core_temp_c"].to_numpy()
     hr = shift["heart_rate"].to_numpy()
     estimators = {
-        "ECTemp (HR only)": estimate_core_temperature(hr)[0],
-        "ThermoTwin (medication-aware)": twin_core_temperature(hr, patient.medications)[0],
+        "ECTemp (HR only)": estimate_core_temperature(hr),
+        "ThermoTwin (medication-aware)": twin_core_temperature(hr, patient.medications),
     }
     return [
         {
             "patient_id": patient.patient_id,
             "beta_blocker": patient.on_beta_blocker,
             "estimator": name,
-            **vars(score(truth, estimate)),
+            **vars(score(truth, *estimate)),
         }
         for name, estimate in estimators.items()
     ]
@@ -73,6 +82,7 @@ def summarise(results: pd.DataFrame) -> pd.DataFrame:
         bias_c=("bias", "mean"),
         danger_minutes=("danger_minutes", "sum"),
         missed_danger_minutes=("missed_danger_minutes", "sum"),
+        false_alarm_minutes=("false_alarm_minutes", "sum"),
     )
     summary["missed_danger_pct"] = (
         100 * summary["missed_danger_minutes"] / summary["danger_minutes"].replace(0, np.nan)
