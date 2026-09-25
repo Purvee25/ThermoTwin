@@ -435,3 +435,181 @@ select {
   color: var(--muted);
   font-size: 0.8rem;
 }
+
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.tabs button {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabs button[aria-pressed='true'] {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.review {
+  padding: 16px;
+}
+
+.review-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.review-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+}
+
+.review-head .hint {
+  max-width: 70ch;
+}
+
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.review-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  break-inside: avoid;
+}
+
+@media (max-width: 760px) {
+  .review-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.review-patient {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.review-patient .chips {
+  grid-column: auto;
+}
+
+.priority {
+  justify-self: start;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.priority.high {
+  background: var(--red-soft);
+  color: var(--danger);
+}
+
+.priority.medium {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.priority.low {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.review-facts {
+  display: flex;
+  gap: 16px;
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+}
+
+.review-facts dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.review-facts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.danger-text {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.findings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.findings li {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  font-size: 0.9rem;
+}
+
+.finding-title {
+  font-weight: 600;
+}
+
+.finding-action {
+  margin-top: 2px;
+  color: var(--scenario);
+  font-weight: 500;
+}
+
+.finding-evidence {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+@media print {
+  .tabs,
+  .review-actions,
+  .day-chip {
+    display: none;
+  }
+
+  :root {
+    --bg: #fff;
+    --surface: #fff;
+    --surface-2: #f4f4f4;
+    --text: #000;
+  }
+}

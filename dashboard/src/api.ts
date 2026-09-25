@@ -65,6 +65,29 @@ export const Meta = z.object({
 })
 export type Meta = z.infer<typeof Meta>
 
+const ReviewFinding = z.object({
+  code: z.string(),
+  title: z.string(),
+  detail: z.string(),
+  action: z.string(),
+  evidence: z.string(),
+})
+
+export const ReviewItem = z.object({
+  patient_id: z.string(),
+  name: z.string(),
+  age: z.number(),
+  occupation: z.string(),
+  medications: z.array(z.string()),
+  priority: z.enum(['high', 'medium', 'low']),
+  score: z.number(),
+  heat_minutes: z.number(),
+  egfr_last_year: z.number(),
+  egfr_now: z.number(),
+  findings: z.array(ReviewFinding),
+})
+export type ReviewItem = z.infer<typeof ReviewItem>
+
 async function request<T>(schema: z.ZodType<T>, path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, init)
   if (!response.ok) throw new Error(`${response.status} ${response.statusText} for ${path}`)
@@ -74,6 +97,7 @@ async function request<T>(schema: z.ZodType<T>, path: string, init?: RequestInit
 export const api = {
   meta: () => request(Meta, '/meta'),
   patients: (minute: number) => request(z.array(PatientSummary), `/patients?minute=${minute}`),
+  review: () => request(z.array(ReviewItem), '/review'),
   timeline: (id: string) => request(Timeline, `/patients/${encodeURIComponent(id)}/timeline`),
   whatIf: (id: string, startMinute: number, durationMin: number) =>
     request(WhatIf, `/patients/${encodeURIComponent(id)}/whatif`, {

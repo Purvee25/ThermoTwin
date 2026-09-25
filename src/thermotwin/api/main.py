@@ -11,7 +11,14 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from thermotwin.api.schemas import Meta, PatientSummary, Timeline, WhatIfRequest, WhatIfResponse
+from thermotwin.api.schemas import (
+    Meta,
+    PatientSummary,
+    ReviewItem,
+    Timeline,
+    WhatIfRequest,
+    WhatIfResponse,
+)
 from thermotwin.api.service import PatientNotFoundError, TwinService
 
 
@@ -61,6 +68,11 @@ def patients(
     service: Service, minute: Annotated[int | None, Query(ge=0)] = None
 ) -> list[PatientSummary]:
     return service.summaries(minute)
+
+
+@app.get("/review", response_model=list[ReviewItem])
+def review(service: Service) -> list[ReviewItem]:
+    return service.review()
 
 
 @app.get("/patients/{patient_id}/timeline", response_model=Timeline)

@@ -103,6 +103,13 @@ hypertensive outdoor workers. For each worker it shows:
   60 minutes*
 - medication heat-risk notes
 - a what-if simulator that re-runs the shift with an extra rest break
+- a **pre-summer review** tab: a printable, ranked list of findings for the clinician. Each
+  finding comes from a transparent rule and cites its evidence:
+  - diuretic + ACE inhibitor/ARB + NSAID "triple whammy" (Lapi et al., BMJ 2013)
+  - eGFR falling ≥ 5 mL/min/1.73 m² a year or below 60 (KDIGO 2024)
+  - beta-blockers masking heat strain in heart rate (ThermoTwin real-data ablation)
+  - ACE inhibitor/ARB/calcium-channel blocker heat-illness risk (2026 cohort study)
+  - heat strain predicted by the twin's heatwave replay (NDMA guidance)
 
 ```bash
 uv run python -m thermotwin.forecast --patients 200 --seed 7 --save-model   # once, ~5 min
@@ -151,6 +158,8 @@ results above as the headline numbers.
 | `forecast.py` | 60-minute danger forecast, baselines, oracle ceiling, lead times |
 | `personal.py` | Per-person bias learned from earlier shifts' thermometer readings |
 | `personal_validation.py` | Real-data test of per-person learning (leave-own-trial-out) |
+| `review.py` | Evidence-referenced pre-summer medication and heat review rules |
+| `api/` | FastAPI service: patients, timelines, what-if, review |
 | `real_ablation.py` | Beta-blocker ablation on real heart rate and core temperature |
 
 ## Roadmap
@@ -163,7 +172,8 @@ results above as the headline numbers.
 - [x] 60-minute forecast with baselines and oracle ceiling
 - [x] Per-person bias learning across shifts (validated on real data)
 - [ ] Conformal intervals; reduce false alarms
-- [ ] Kidney-injury warning, acclimatisation tracking, pre-summer medication review
+- [x] Kidney-injury (triple-whammy) warning and pre-summer medication review
+- [ ] Acclimatisation tracking
 - [x] FastAPI service and React clinician dashboard with a what-if simulator
 - [ ] Docker Compose, architecture PDF, demo video
 

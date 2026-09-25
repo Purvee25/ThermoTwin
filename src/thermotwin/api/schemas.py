@@ -74,3 +74,25 @@ class Meta(BaseModel):
     danger_core_c: float
     alert_probability: float
     disclaimer: str
+
+
+class ReviewFinding(BaseModel):
+    code: str
+    title: str
+    detail: str
+    action: str
+    evidence: str
+
+
+class ReviewItem(BaseModel):
+    patient_id: str
+    name: str
+    age: int
+    occupation: str
+    medications: list[str]
+    priority: Literal["high", "medium", "low"]
+    score: int
+    heat_minutes: int = Field(description="Minutes likely >= 38 °C core in the heatwave replay")
+    egfr_last_year: float
+    egfr_now: float
+    findings: list[ReviewFinding]

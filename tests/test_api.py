@@ -75,3 +75,14 @@ def test_whatif_validates_duration(client):
     )
 
     assert response.status_code == 422
+
+
+def test_review_is_ranked_and_actionable(client):
+    items = client.get("/review").json()
+
+    assert len(items) == 3
+    scores = [i["score"] for i in items]
+    assert scores == sorted(scores, reverse=True)
+    for item in items:
+        assert item["priority"] in {"high", "medium", "low"}
+        assert all(f["action"] and f["evidence"] for f in item["findings"])

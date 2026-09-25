@@ -12,6 +12,9 @@ import numpy as np
 from thermotwin.medication import DrugClass
 
 BETA_BLOCKER_SHARE = 0.5
+NSAID_SHARE = 0.3
+FAST_KIDNEY_DECLINE_SHARE = 0.2
+EHR_STREAM = 1
 OTHER_ANTIHYPERTENSIVES = (
     DrugClass.ACE_INHIBITOR,
     DrugClass.ARB,
@@ -33,6 +36,18 @@ class HiddenPhysiology:
 
 
 @dataclass(frozen=True)
+class KidneyRecord:
+    """eGFR in mL/min/1.73 m², one year apart."""
+
+    egfr_last_year: float
+    egfr_now: float
+
+    @property
+    def annual_change_pct(self) -> float:
+        return 100 * (self.egfr_now - self.egfr_last_year) / self.egfr_last_year
+
+
+@dataclass(frozen=True)
 class Patient:
     patient_id: str
     age: int
@@ -41,6 +56,7 @@ class Patient:
     weight_kg: float
     medications: frozenset[DrugClass]
     hidden: HiddenPhysiology
+    kidney: KidneyRecord
 
     @property
     def on_beta_blocker(self) -> bool:
@@ -73,6 +89,13 @@ def _sample_hidden(rng: np.random.Generator, on_beta_blocker: bool) -> HiddenPhy
     )
 
 
+def _sample_kidney(rng: np.random.Generator, age: int) -> KidneyRecord:
+    last_year = float(np.clip(rng.normal(95 - 0.7 * (age - 30), 14), 35, 125))
+    fast = rng.random() < FAST_KIDNEY_DECLINE_SHARE
+    change_pct = rng.uniform(-22, -10) if fast else rng.normal(-2, 2.5)
+    return KidneyRecord(last_year, last_year * (1 + change_pct / 100))
+
+
 def generate_cohort(n_patients: int, seed: int = 0) -> list[Patient]:
     """Generate hypertensive outdoor workers, about half on beta-blockers.
 
@@ -86,21 +109,29 @@ def generate_cohort(n_patients: int, seed: int = 0) -> list[Patient]:
     if n_patients <= 0:
         raise ValueError("n_patients must be positive")
     rng = np.random.default_rng(seed)
+    # EHR-only fields use their own stream so physiology draws stay identical across versions.
+    ehr_rng = np.random.default_rng([seed, EHR_STREAM])
     patients = []
     for i in range(n_patients):
         on_bb = bool(rng.random() < BETA_BLOCKER_SHARE)
         sex = "male" if rng.random() < 0.85 else "female"
         height = float(rng.normal(1.68 if sex == "male" else 1.55, 0.06))
         bmi = float(np.clip(rng.normal(25.5, 3.5), 18.5, 36))
+        age = int(rng.integers(28, 61))
+        meds = _sample_medications(rng, on_bb)
+        hidden = _sample_hidden(rng, on_bb)
+        if ehr_rng.random() < NSAID_SHARE:
+            meds = meds | {DrugClass.NSAID}
         patients.append(
             Patient(
                 patient_id=f"P{i:04d}",
-                age=int(rng.integers(28, 61)),
+                age=age,
                 sex=sex,
                 height_m=height,
                 weight_kg=bmi * height**2,
-                medications=_sample_medications(rng, on_bb),
-                hidden=_sample_hidden(rng, on_bb),
+                medications=meds,
+                hidden=hidden,
+                kidney=_sample_kidney(ehr_rng, age),
             )
         )
     return patients

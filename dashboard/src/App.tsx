@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api } from './api'
 import { PatientList } from './components/PatientList'
+import { ReviewScreen } from './components/ReviewScreen'
 import { TwinView } from './components/TwinView'
 
 const SHIFT_START_MINUTE = 20
@@ -13,7 +14,10 @@ function minuteToClock(minute: number): string {
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
 }
 
+type View = 'twin' | 'review'
+
 export default function App() {
+  const [view, setView] = useState<View>('twin')
   const [minute, setMinute] = useState(DEFAULT_MINUTE)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const meta = useQuery({ queryKey: ['meta'], queryFn: api.meta })
@@ -43,48 +47,63 @@ export default function App() {
         )}
       </header>
 
-      <label className="replay">
-        <span>Shift time</span>
-        <input
-          type="range"
-          min={SHIFT_START_MINUTE + 15}
-          max={SHIFT_END_MINUTE}
-          value={minute}
-          onChange={(e) => setMinute(Number(e.target.value))}
-          aria-label="Replay time"
-        />
-        <span className="clock">{minuteToClock(minute)}</span>
-      </label>
+      <nav className="tabs" aria-label="Views">
+        <button type="button" aria-pressed={view === 'twin'} onClick={() => setView('twin')}>
+          Live twin
+        </button>
+        <button type="button" aria-pressed={view === 'review'} onClick={() => setView('review')}>
+          Pre-summer review
+        </button>
+      </nav>
 
-      {patients.isError && (
-        <p className="panel notice error">
-          Could not reach the ThermoTwin API. Start it with{' '}
-          <code>uv run uvicorn thermotwin.api.main:app</code>.
-        </p>
-      )}
-
-      <div className="layout">
-        <section className="panel" aria-label="Patients">
-          <h2 className="panel-title">Patients · highest risk now</h2>
-          {patients.isPending ? (
-            <p className="notice">Loading twins…</p>
-          ) : (
-            <PatientList
-              patients={patients.data ?? []}
-              activeId={activeId}
-              onSelect={setSelectedId}
+      {view === 'review' ? (
+        <ReviewScreen />
+      ) : (
+        <>
+          <label className="replay">
+            <span>Shift time</span>
+            <input
+              type="range"
+              min={SHIFT_START_MINUTE + 15}
+              max={SHIFT_END_MINUTE}
+              value={minute}
+              onChange={(e) => setMinute(Number(e.target.value))}
+              aria-label="Replay time"
             />
-          )}
-        </section>
+            <span className="clock">{minuteToClock(minute)}</span>
+          </label>
 
-        <section className="panel" aria-label="Patient twin">
-          {active && meta.data ? (
-            <TwinView patient={active} minute={minute} dangerCoreC={meta.data.danger_core_c} />
-          ) : (
-            <p className="notice">Select a patient.</p>
+          {patients.isError && (
+            <p className="panel notice error">
+              Could not reach the ThermoTwin API. Start it with{' '}
+              <code>uv run uvicorn thermotwin.api.main:app</code>.
+            </p>
           )}
-        </section>
-      </div>
+
+          <div className="layout">
+            <section className="panel" aria-label="Patients">
+              <h2 className="panel-title">Patients · highest risk now</h2>
+              {patients.isPending ? (
+                <p className="notice">Loading twins…</p>
+              ) : (
+                <PatientList
+                  patients={patients.data ?? []}
+                  activeId={activeId}
+                  onSelect={setSelectedId}
+                />
+              )}
+            </section>
+
+            <section className="panel" aria-label="Patient twin">
+              {active && meta.data ? (
+                <TwinView patient={active} minute={minute} dangerCoreC={meta.data.danger_core_c} />
+              ) : (
+                <p className="notice">Select a patient.</p>
+              )}
+            </section>
+          </div>
+        </>
+      )}
 
       {meta.data && <p className="footer">{meta.data.disclaimer}</p>}
     </div>

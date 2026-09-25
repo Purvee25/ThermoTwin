@@ -14,6 +14,8 @@ from thermotwin.api.schemas import (
     MedicationFlag,
     Meta,
     PatientSummary,
+    ReviewFinding,
+    ReviewItem,
     RiskStatus,
     ScenarioSummary,
     Timeline,
@@ -30,6 +32,7 @@ from thermotwin.forecast import (
 )
 from thermotwin.medication import DrugClass
 from thermotwin.personal import PersonalBias
+from thermotwin.review import review_patient
 from thermotwin.simulator import PRE_SHIFT_REST_MIN, simulate_shift
 from thermotwin.weather import DayWeather, delhi_heatwave_2024
 
@@ -182,6 +185,39 @@ class TwinService:
             status=_status(max(now, above) if now is not None else float(np.nanmax(risk))),
             first_alert_clock=_clock(alerts["hour"].iloc[0]) if len(alerts) else None,
         )
+
+    def review(self) -> list[ReviewItem]:
+        """Pre-summer review for every patient, highest priority first."""
+        items = []
+        for demo in self._patients.values():
+            shift = demo.timeline[demo.timeline["minute"] >= PRE_SHIFT_REST_MIN]
+            heat_minutes = int((shift["p_above_now"] >= ALERT_PROBABILITY).sum())
+            result = review_patient(demo.patient, heat_minutes)
+            items.append(
+                ReviewItem(
+                    patient_id=demo.patient.patient_id,
+                    name=demo.name,
+                    age=demo.patient.age,
+                    occupation=demo.occupation,
+                    medications=sorted(m.value for m in demo.patient.medications),
+                    priority=result.priority.value,
+                    score=result.score,
+                    heat_minutes=heat_minutes,
+                    egfr_last_year=round(demo.patient.kidney.egfr_last_year, 1),
+                    egfr_now=round(demo.patient.kidney.egfr_now, 1),
+                    findings=[
+                        ReviewFinding(
+                            code=f.code,
+                            title=f.title,
+                            detail=f.detail,
+                            action=f.action,
+                            evidence=f.evidence,
+                        )
+                        for f in result.findings
+                    ],
+                )
+            )
+        return sorted(items, key=lambda r: (-r.score, -r.heat_minutes))
 
     def timeline(self, patient_id: str) -> Timeline:
         demo = self._get(patient_id)
