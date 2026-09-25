@@ -14,7 +14,17 @@ blunt the heart-rate rise that wearable heat models rely on, so those models und
 temperature for exactly these patients. ThermoTwin reads the patient's medication record and
 corrects its physiology model before estimating and forecasting heat strain.
 
-## Quickstart
+## Run everything with Docker
+
+```bash
+docker compose up --build        # first build trains the forecaster (~5–10 min)
+```
+
+Open http://localhost:8080. The API runs as a non-root user with a health check. The
+dashboard waits until the API is healthy, and nginx serves it and proxies `/api`. Set
+`THERMOTWIN_PORT` to use a different host port.
+
+## Quickstart (development)
 
 ```bash
 uv sync
@@ -175,15 +185,27 @@ results above as the headline numbers.
 - [x] Kidney-injury (triple-whammy) warning and pre-summer medication review
 - [ ] Acclimatisation tracking
 - [x] FastAPI service and React clinician dashboard with a what-if simulator
-- [ ] Docker Compose, architecture PDF, demo video
+- [x] Docker Compose (API + dashboard)
+- [x] Architecture diagram and presentation (`docs/`)
+- [ ] Demo video
 
 ## Submission details
 
 - **Team:** _TBD_
 - **College / incubator:** _TBD_
 - **Video:** _TBD_
-- **Architecture diagram / presentation:** _TBD_ (`docs/`)
+- **Architecture diagram:** [`docs/ThermoTwin_architecture.pdf`](docs/ThermoTwin_architecture.pdf) (editable `.pptx` alongside)
+- **Presentation:** [`docs/ThermoTwin_presentation.pdf`](docs/ThermoTwin_presentation.pdf) (editable `.pptx` with speaker notes)
 - **License:** MIT (see `LICENSE`)
+
+## Rebuilding the slides
+
+```bash
+npm install --prefix /tmp/deck pptxgenjs
+NODE_PATH=/tmp/deck/node_modules node docs/build_slides.js   # writes docs/*.pptx
+```
+
+Export the PDFs from PowerPoint or Keynote. Dashboard screenshots live in `docs/img/`.
 
 ## References
 

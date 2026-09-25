@@ -16,6 +16,10 @@ import { drugLabel } from '../drugs'
 import { WhatIfPanel } from './WhatIfPanel'
 
 const ALERT_PERCENT = 50
+
+function cssColor(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+}
 const X_TICK_EVERY = 60
 
 interface Row extends Point {
@@ -44,6 +48,8 @@ interface Props {
 
 export function TwinView({ patient, minute, dangerCoreC }: Props) {
   const [showTruth, setShowTruth] = useState(false)
+  const danger = cssColor('--danger')
+  const accent = cssColor('--accent')
   const timeline = useQuery({
     queryKey: ['timeline', patient.patient_id],
     queryFn: () => api.timeline(patient.patient_id),
@@ -106,6 +112,7 @@ export function TwinView({ patient, minute, dangerCoreC }: Props) {
             <YAxis domain={[36.6, 39]} tick={{ fill: 'var(--muted)', fontSize: 12 }} tickFormatter={(v: number) => v.toFixed(1)} />
             <Tooltip
               contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+              itemStyle={{ color: 'var(--text)' }}
               formatter={(value) => (Array.isArray(value) ? value.map((v) => Number(v).toFixed(2)).join(' – ') : Number(value).toFixed(2))}
             />
             <Area dataKey="band" stroke="none" fill="var(--band)" isAnimationActive={false} name="80% interval" />
@@ -116,8 +123,8 @@ export function TwinView({ patient, minute, dangerCoreC }: Props) {
             {scenario && (
               <Line dataKey="scenario_core" stroke="var(--scenario)" strokeWidth={2} dot={false} isAnimationActive={false} name="With rest break" />
             )}
-            <ReferenceLine y={dangerCoreC} stroke="var(--danger)" strokeDasharray="6 4" />
-            <ReferenceLine x={now.clock} stroke="var(--accent)" />
+            <ReferenceLine y={dangerCoreC} stroke={danger} strokeDasharray="6 4" />
+            <ReferenceLine x={now.clock} stroke={accent} />
           </ComposedChart>
         </ResponsiveContainer>
         <label className="toggle">
@@ -136,14 +143,15 @@ export function TwinView({ patient, minute, dangerCoreC }: Props) {
             <YAxis domain={[0, 100]} tick={{ fill: 'var(--muted)', fontSize: 12 }} unit="%" />
             <Tooltip
               contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+              itemStyle={{ color: 'var(--text)' }}
               formatter={(value) => `${Math.round(Number(value))}%`}
             />
             <Area dataKey="risk_pct" stroke="var(--danger)" fill="var(--red-soft)" isAnimationActive={false} name="Risk" connectNulls={false} />
             {scenario && (
               <Line dataKey="scenario_risk_pct" stroke="var(--scenario)" strokeWidth={2} dot={false} isAnimationActive={false} name="With rest break" />
             )}
-            <ReferenceLine y={ALERT_PERCENT} stroke="var(--danger)" strokeDasharray="6 4" />
-            <ReferenceLine x={now.clock} stroke="var(--accent)" />
+            <ReferenceLine y={ALERT_PERCENT} stroke={danger} strokeDasharray="6 4" />
+            <ReferenceLine x={now.clock} stroke={accent} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

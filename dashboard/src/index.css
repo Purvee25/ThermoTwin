@@ -355,10 +355,6 @@ select {
   font-size: 0.9rem;
 }
 
-.flags strong {
-  text-transform: capitalize;
-}
-
 .whatif {
   display: grid;
   gap: 12px;
