@@ -6,6 +6,7 @@ quadratic, so the twin is never tested against its own assumptions.
 """
 
 from dataclasses import dataclass
+from typing import Protocol
 
 import numpy as np
 import pandas as pd
@@ -22,6 +23,7 @@ BREAK_EVERY_MIN = 120
 BREAK_MIN = 15
 WIND_M_S = 1.5
 SUN_RADIANT_OFFSET_C = 8.0
+REFERENCE_SOLAR_W_M2 = 800.0
 INDOOR_TEMP_C = 31.0
 INDOOR_RH = 50.0
 
@@ -31,6 +33,12 @@ HR_PER_SKIN_C = 2.5
 SKIN_HR_THRESHOLD_C = 34.0
 HR_AR_COEF = 0.8
 HR_MIN, HR_MAX = 40.0, 200.0
+
+
+class Weather(Protocol):
+    def at(self, hour: float) -> tuple[float, float]: ...
+    def wind_at(self, hour: float) -> float: ...
+    def solar_at(self, hour: float) -> float: ...
 
 
 @dataclass(frozen=True)
@@ -49,6 +57,12 @@ class HeatDay:
         temp = self.t_min_c + (self.t_max_c - self.t_min_c) * weight
         rh = self.rh_max - (self.rh_max - self.rh_min) * weight
         return float(temp), float(rh)
+
+    def wind_at(self, hour: float) -> float:
+        return WIND_M_S
+
+    def solar_at(self, hour: float) -> float:
+        return REFERENCE_SOLAR_W_M2
 
 
 def activity_schedule(work_par: float, rng: np.random.Generator) -> np.ndarray:
@@ -90,12 +104,12 @@ def _heart_rate(
     return np.clip(true_hr + noise, HR_MIN, HR_MAX)
 
 
-def simulate_shift(patient: Patient, heat_day: HeatDay = HeatDay(), seed: int = 0) -> pd.DataFrame:
+def simulate_shift(patient: Patient, weather: Weather = HeatDay(), seed: int = 0) -> pd.DataFrame:
     """Simulate one work shift minute by minute.
 
     Args:
         patient: Worker to simulate.
-        heat_day: Outdoor weather profile.
+        weather: Outdoor weather (synthetic HeatDay or a real DayWeather replay).
         seed: Random seed for activity and heart-rate noise.
 
     Returns:
@@ -112,16 +126,18 @@ def simulate_shift(patient: Patient, heat_day: HeatDay = HeatDay(), seed: int = 
         sex=patient.sex,
     )
     pelvis = model.body_names.index("pelvis")
-    model.clo, model.v = patient.hidden.clothing_clo, WIND_M_S
+    model.clo = patient.hidden.clothing_clo
 
     hours = SHIFT_START_HOUR + (np.arange(n) - PRE_SHIFT_REST_MIN) / 60
     air, rh = np.empty(n), np.empty(n)
     core, skin = np.empty(n), np.empty(n)
     for i in range(n):
         outdoors = i >= PRE_SHIFT_REST_MIN
-        air[i], rh[i] = heat_day.at(hours[i]) if outdoors else (INDOOR_TEMP_C, INDOOR_RH)
+        air[i], rh[i] = weather.at(hours[i]) if outdoors else (INDOOR_TEMP_C, INDOOR_RH)
+        solar_gain = weather.solar_at(hours[i]) / REFERENCE_SOLAR_W_M2 if outdoors else 0.0
         model.tdb, model.rh, model.par = air[i], rh[i], par[i]
-        model.tr = air[i] + (SUN_RADIANT_OFFSET_C if outdoors else 0.0)
+        model.v = weather.wind_at(hours[i]) if outdoors else WIND_M_S
+        model.tr = air[i] + SUN_RADIANT_OFFSET_C * solar_gain
         model.simulate(times=1, dtime=60)
         core[i] = model.t_core[pelvis]
         skin[i] = model.t_skin_mean

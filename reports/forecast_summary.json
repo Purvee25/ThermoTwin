@@ -1,0 +1,142 @@
+{
+  "Weather-only heat alert": {
+    "auroc": 0.622,
+    "auprc": 0.349,
+    "brier": 0.192,
+    "episodes": 19,
+    "warned_30min_ahead_pct": 0.0,
+    "median_lead_min": NaN,
+    "alert_minutes_pct": 0.0
+  },
+  "Weather-only heat alert [beta-blocker]": {
+    "auroc": 0.603,
+    "auprc": 0.373,
+    "brier": 0.208,
+    "episodes": 13,
+    "warned_30min_ahead_pct": 0.0,
+    "median_lead_min": NaN,
+    "alert_minutes_pct": 0.0
+  },
+  "Weather-only heat alert [no beta-blocker]": {
+    "auroc": 0.653,
+    "auprc": 0.32,
+    "brier": 0.17,
+    "episodes": 6,
+    "warned_30min_ahead_pct": 0.0,
+    "median_lead_min": NaN,
+    "alert_minutes_pct": 0.0
+  },
+  "Twin nowcast (no ML)": {
+    "auroc": 0.704,
+    "auprc": 0.426,
+    "brier": 0.228,
+    "episodes": 19,
+    "warned_30min_ahead_pct": 15.8,
+    "median_lead_min": 29.5,
+    "alert_minutes_pct": 23.0
+  },
+  "Twin nowcast (no ML) [beta-blocker]": {
+    "auroc": 0.783,
+    "auprc": 0.571,
+    "brier": 0.199,
+    "episodes": 13,
+    "warned_30min_ahead_pct": 23.1,
+    "median_lead_min": 47.5,
+    "alert_minutes_pct": 17.3
+  },
+  "Twin nowcast (no ML) [no beta-blocker]": {
+    "auroc": 0.621,
+    "auprc": 0.311,
+    "brier": 0.265,
+    "episodes": 6,
+    "warned_30min_ahead_pct": 0.0,
+    "median_lead_min": 15.5,
+    "alert_minutes_pct": 30.4
+  },
+  "Physics projection (no ML)": {
+    "auroc": 0.695,
+    "auprc": 0.391,
+    "brier": 0.708,
+    "episodes": 19,
+    "warned_30min_ahead_pct": 78.9,
+    "median_lead_min": 50.0,
+    "alert_minutes_pct": 98.9
+  },
+  "Physics projection (no ML) [beta-blocker]": {
+    "auroc": 0.754,
+    "auprc": 0.501,
+    "brier": 0.66,
+    "episodes": 13,
+    "warned_30min_ahead_pct": 76.9,
+    "median_lead_min": 54.0,
+    "alert_minutes_pct": 98.5
+  },
+  "Physics projection (no ML) [no beta-blocker]": {
+    "auroc": 0.622,
+    "auprc": 0.273,
+    "brier": 0.771,
+    "episodes": 6,
+    "warned_30min_ahead_pct": 83.3,
+    "median_lead_min": 48.0,
+    "alert_minutes_pct": 99.4
+  },
+  "ThermoTwin 60-min forecast": {
+    "auroc": 0.695,
+    "auprc": 0.415,
+    "brier": 0.237,
+    "episodes": 19,
+    "warned_30min_ahead_pct": 26.3,
+    "median_lead_min": 44.0,
+    "alert_minutes_pct": 14.9
+  },
+  "ThermoTwin 60-min forecast [beta-blocker]": {
+    "auroc": 0.697,
+    "auprc": 0.526,
+    "brier": 0.252,
+    "episodes": 13,
+    "warned_30min_ahead_pct": 30.8,
+    "median_lead_min": 48.0,
+    "alert_minutes_pct": 15.2
+  },
+  "ThermoTwin 60-min forecast [no beta-blocker]": {
+    "auroc": 0.733,
+    "auprc": 0.324,
+    "brier": 0.218,
+    "episodes": 6,
+    "warned_30min_ahead_pct": 16.7,
+    "median_lead_min": 18.0,
+    "alert_minutes_pct": 14.6
+  },
+  "Oracle ceiling (knows true current core)": {
+    "auroc": 0.971,
+    "auprc": 0.942,
+    "brier": 0.061,
+    "episodes": 19,
+    "warned_30min_ahead_pct": 63.2,
+    "median_lead_min": 39.0,
+    "alert_minutes_pct": 21.8
+  },
+  "Oracle ceiling (knows true current core) [beta-blocker]": {
+    "auroc": 0.96,
+    "auprc": 0.929,
+    "brier": 0.083,
+    "episodes": 13,
+    "warned_30min_ahead_pct": 53.8,
+    "median_lead_min": 39.0,
+    "alert_minutes_pct": 24.3
+  },
+  "Oracle ceiling (knows true current core) [no beta-blocker]": {
+    "auroc": 0.99,
+    "auprc": 0.972,
+    "brier": 0.031,
+    "episodes": 6,
+    "warned_30min_ahead_pct": 83.3,
+    "median_lead_min": 40.0,
+    "alert_minutes_pct": 18.6
+  },
+  "_meta": {
+    "train_patients": 140,
+    "test_patients": 60,
+    "test_positive_rate": 0.269
+  }
+}

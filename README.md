@@ -50,6 +50,34 @@ Alerts fire when the estimate's upper bound (mean + 1 SD) reaches 38 °C. PROSPI
 participants are healthy volunteers, so the drug effect is simulated. A trial with real
 beta-blocker users would be the next validation step.
 
+## 60-minute forecast (real Delhi heatwave weather, May–June 2024)
+
+Question at each minute: *will core temperature reach 38 °C in the next 60 minutes?*
+There are 200 simulated workers, each on a real Delhi heatwave day (Open-Meteo, peaks of 46 °C).
+We test on 60 patients the model never trained on.
+
+| Method | AUROC | AUPRC | Episodes warned ≥30 min ahead |
+|---|---|---|---|
+| Weather-only heat alert | 0.62 | 0.35 | 0% |
+| Twin nowcast (no ML) | 0.70 | 0.43 | 16% |
+| **ThermoTwin 60-min forecast** | **0.70** | **0.42** | **26%** (median lead 44 min) |
+| Oracle ceiling (knows true current core) | 0.97 | 0.94 | 63% |
+
+**Honest reading:**
+- The twin beats a city-wide weather alert.
+- The oracle shows the bottleneck is *estimating current core temperature*, not forecasting.
+  On heatwave days workers hover near 37.8 °C (SD 0.23 °C), so the twin's ~0.25 °C
+  estimation error is as large as the whole spread.
+- Things we tried that did not help:
+  - a Gagge physics projection
+  - anchoring the start with a thermometer reading
+  - thermometer spot readings at each break
+- Next step: learn each person's heart-rate offset over time.
+
+```bash
+uv run python -m thermotwin.forecast --patients 200
+```
+
 ## Simulated cohort (60 patients, seed 42)
 
 | Group | Estimator | Core-temp RMSE | Bias | Danger missed | False-alarm minutes |
@@ -84,6 +112,8 @@ results above as the headline numbers.
 | `ablation.py` | Signature comparison on the simulated cohort |
 | `prospie.py` | Loader for the real PROSPIE heat-trial dataset |
 | `fusion.py` | Participant-held-out ECTemp validation and skin-temperature fusion test |
+| `weather.py` | Open-Meteo historical weather (cached), Delhi heatwave 2024 |
+| `forecast.py` | 60-minute danger forecast, baselines, oracle ceiling, lead times |
 | `real_ablation.py` | Beta-blocker ablation on real heart rate and core temperature |
 
 ## Roadmap
@@ -92,8 +122,9 @@ results above as the headline numbers.
 - [ ] Reduce false alarms; no-wearable Tier 0 model (skin fusion tested: negligible gain)
 - [x] Real-data validation and beta-blocker ablation on PROSPIE
 - [ ] Synthea cohort with a custom beta-blocker module, exported as FHIR
-- [ ] Real heatwave replay from Open-Meteo historical weather
-- [ ] 60-minute forecast (XGBoost on physics residuals) with conformal intervals
+- [x] Real heatwave replay from Open-Meteo historical weather
+- [x] 60-minute forecast with baselines and oracle ceiling
+- [ ] Per-person heart-rate offset learning (closes the gap to the oracle); conformal intervals
 - [ ] Kidney-injury warning, acclimatisation tracking, pre-summer medication review
 - [ ] FastAPI service and React clinician dashboard with a what-if simulator
 - [ ] Docker Compose, architecture PDF, demo video
