@@ -12,6 +12,7 @@ import argparse
 import json
 from pathlib import Path
 
+import joblib
 import numpy as np
 import pandas as pd
 from pythermalcomfort.models import two_nodes_gagge
@@ -35,6 +36,7 @@ ALERT_PROBABILITY = 0.5
 MIN_LEAD_MIN = 30
 REPORT_PATH = Path("reports/forecast_summary.json")
 PRIOR_SHIFTS = 2
+MODEL_PATH = Path("models/forecast.joblib")
 ASSUMED_CLOTHING_CLO = 0.75
 FORECAST_WIND_M_S = 1.5
 GAGGE_NEUTRAL_CORE_C = 36.8
@@ -70,29 +72,31 @@ def learn_bias(
     return bias
 
 
-def shift_features(
-    patient: Patient, day: DayWeather, seed: int, bias: PersonalBias | None = None
+def features_from_shift(
+    patient: Patient, day: DayWeather, shift: pd.DataFrame, bias: PersonalBias | None = None
 ) -> pd.DataFrame:
-    """One simulated shift turned into per-minute features and the 60-minute label."""
-    shift = simulate_shift(patient, day, seed=seed)
+    """Per-minute twin features for an already simulated shift (label NaN near shift end)."""
     est, var = twin_core_temperature(shift["heart_rate"].to_numpy(), patient.medications)
     if bias is not None:
         est = bias.correct(est)
     core = shift["core_temp_c"]
     future_max = core[::-1].rolling(HORIZON_MIN, min_periods=HORIZON_MIN).max()[::-1].shift(-1)
+    hour_ahead = shift["hour"] + HORIZON_MIN / 60
 
     df = pd.DataFrame(
         {
             "patient_id": patient.patient_id,
             "date": day.date,
             "minute": shift["minute"],
+            "hour": shift["hour"],
             "true_core_c": core,
             "twin_core_c": est,
             "twin_core_sd": np.sqrt(var),
             "heart_rate": shift["heart_rate"],
             "air_temp_c": shift["air_temp_c"],
-            "air_temp_in_60": shift["air_temp_c"].shift(-HORIZON_MIN),
+            "air_temp_in_60": [day.at(h)[0] for h in hour_ahead],
             "rh": shift["rh"],
+            "par": shift["par"],
             "par_recent": shift["par"].rolling(TREND_MIN, min_periods=1).mean(),
             "minutes_into_shift": shift["minute"] - PRE_SHIFT_REST_MIN,
             "beta_blocker": int(patient.on_beta_blocker),
@@ -106,8 +110,16 @@ def shift_features(
         air_next.to_numpy(), df["rh"].to_numpy(), df["par_recent"].to_numpy()
     )
     df["physics_projection_c"] = df["twin_core_c"] + df["physics_rise_60"]
-    df["twin_core_slope"] = df["twin_core_c"].diff(TREND_MIN) / TREND_MIN
-    df["hr_slope"] = df["heart_rate"].diff(TREND_MIN) / TREND_MIN
+    df["twin_core_slope"] = (df["twin_core_c"].diff(TREND_MIN) / TREND_MIN).fillna(0.0)
+    df["hr_slope"] = (df["heart_rate"].diff(TREND_MIN) / TREND_MIN).fillna(0.0)
+    return df
+
+
+def shift_features(
+    patient: Patient, day: DayWeather, seed: int, bias: PersonalBias | None = None
+) -> pd.DataFrame:
+    """One simulated shift as labelled training rows (after warm-up, complete labels only)."""
+    df = features_from_shift(patient, day, simulate_shift(patient, day, seed=seed), bias)
     keep = df["minutes_into_shift"] >= WARMUP_MIN
     return df[keep].dropna(subset=[*FEATURES, "label"])
 
@@ -199,10 +211,10 @@ def run(n_patients: int, seed: int, learn_personal: bool = False) -> dict[str, d
     weather_only = LogisticRegression(max_iter=1000).fit(
         train[["air_temp_c", "air_temp_in_60", "rh"]], train["label"]
     )
-    twin = HistGradientBoostingClassifier(max_iter=300, learning_rate=0.05, random_state=seed)
+    twin = new_forecaster(seed)
     twin.fit(train[FEATURES], train["label"])
     oracle_cols = [*FEATURES, "true_core_c"]
-    oracle = HistGradientBoostingClassifier(max_iter=300, learning_rate=0.05, random_state=seed)
+    oracle = new_forecaster(seed)
     oracle.fit(train[oracle_cols], train["label"])
 
     probs = {
@@ -230,12 +242,29 @@ def run(n_patients: int, seed: int, learn_personal: bool = False) -> dict[str, d
     return report
 
 
+def new_forecaster(seed: int) -> HistGradientBoostingClassifier:
+    return HistGradientBoostingClassifier(max_iter=300, learning_rate=0.05, random_state=seed)
+
+
+def train_and_save(n_patients: int, seed: int, path: Path = MODEL_PATH) -> Path:
+    """Fit the forecaster on all simulated patients (with personal learning) and save it."""
+    data = build_dataset(n_patients, seed, learn_personal=True)
+    model = new_forecaster(seed).fit(data[FEATURES], data["label"])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    joblib.dump({"model": model, "features": FEATURES}, path)
+    return path
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--patients", type=int, default=200)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--learn-personal", action="store_true")
+    parser.add_argument("--save-model", action="store_true", help="train on all and save")
     args = parser.parse_args()
+    if args.save_model:
+        print(f"saved {train_and_save(args.patients, args.seed)}")
+        return
     report = run(args.patients, args.seed, args.learn_personal)
     path = REPORT_PATH.with_stem(REPORT_PATH.stem + ("_personal" if args.learn_personal else ""))
     path.parent.mkdir(parents=True, exist_ok=True)

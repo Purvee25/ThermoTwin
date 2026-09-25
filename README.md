@@ -56,12 +56,16 @@ Question at each minute: *will core temperature reach 38 °C in the next 60 minu
 There are 200 simulated workers, each on a real Delhi heatwave day (Open-Meteo, peaks of 46 °C).
 We test on 60 patients the model never trained on.
 
-| Method | AUROC | AUPRC | Episodes warned ≥30 min ahead |
-|---|---|---|---|
-| Weather-only heat alert | 0.62 | 0.35 | 0% |
-| Twin nowcast (no ML) | 0.70 | 0.43 | 16% |
-| **ThermoTwin 60-min forecast** | **0.70** | **0.42** | **26%** (median lead 44 min) |
-| Oracle ceiling (knows true current core) | 0.97 | 0.94 | 63% |
+Mean over 3 seeds (11, 42, 123), 200 patients each, tested on unseen patients:
+
+| Method | AUROC (range) | Episodes warned ≥30 min ahead |
+|---|---|---|
+| Weather-only heat alert | 0.53 (0.47–0.59) | 0% |
+| Twin nowcast (no ML) | 0.74 (0.69–0.78) | 21% |
+| ThermoTwin 60-min forecast | 0.69 (0.57–0.75) | 28% |
+| Twin nowcast + learned personal bias | **0.83** (0.77–0.90) | 25% |
+| **ThermoTwin forecast + learned personal bias** | **0.80** (0.69–0.88) | **31%** |
+| Oracle ceiling (knows true current core) | 0.97 (0.97–0.98) | 60% |
 
 **Honest reading:**
 - The twin beats a city-wide weather alert.
@@ -82,11 +86,32 @@ We test on 60 patients the model never trained on.
   | Beta-blocker | 0.438 → **0.365 °C** (bias −0.25 → −0.05) | 59% → **79%** | 13% → 38% |
 
   A linear "rest + activity + heat" heart-rate model was also tried and rejected
-  (0.49–0.98 °C vs 0.36 °C). Multi-seed forecast results with learning are in progress.
+  (0.49–0.98 °C vs 0.36 °C). Across 3 seeds this lifts forecast AUROC from 0.69 to 0.80 (table above).
 
 ```bash
-uv run python -m thermotwin.forecast --patients 200
+uv run python -m thermotwin.forecast --patients 200                  # population twin
+uv run python -m thermotwin.forecast --patients 200 --learn-personal # with per-person learning
 ```
+
+## Clinician dashboard
+
+The dashboard replays the real Delhi heatwave of 28 May 2024 (45.8 °C) for 12 simulated
+hypertensive outdoor workers. For each worker it shows:
+- the medication-aware core estimate with an 80% interval, sized from error measured on real
+  heat trials
+- two separate numbers: the chance core is ≥38 °C *now*, and the ML forecast for the *next
+  60 minutes*
+- medication heat-risk notes
+- a what-if simulator that re-runs the shift with an extra rest break
+
+```bash
+uv run python -m thermotwin.forecast --patients 200 --seed 7 --save-model   # once, ~5 min
+uv run uvicorn thermotwin.api.main:app --port 8010                          # API
+npm --prefix dashboard install && npm --prefix dashboard run dev            # http://localhost:5173
+```
+
+The patient-list colour uses the higher of "now" and "60-min forecast" as a cautious
+triage rule. That rule itself has not been separately evaluated.
 
 ## Simulated cohort (60 patients, seed 42)
 
@@ -139,7 +164,7 @@ results above as the headline numbers.
 - [x] Per-person bias learning across shifts (validated on real data)
 - [ ] Conformal intervals; reduce false alarms
 - [ ] Kidney-injury warning, acclimatisation tracking, pre-summer medication review
-- [ ] FastAPI service and React clinician dashboard with a what-if simulator
+- [x] FastAPI service and React clinician dashboard with a what-if simulator
 - [ ] Docker Compose, architecture PDF, demo video
 
 ## Submission details

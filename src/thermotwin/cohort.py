@@ -51,6 +51,8 @@ def _sample_medications(rng: np.random.Generator, on_beta_blocker: bool) -> froz
     n_other = rng.integers(1, 3)
     others = rng.choice(len(OTHER_ANTIHYPERTENSIVES), size=n_other, replace=False)
     meds = {OTHER_ANTIHYPERTENSIVES[i] for i in others}
+    if DrugClass.ACE_INHIBITOR in meds:
+        meds.discard(DrugClass.ARB)  # dual RAAS blockade is avoided in practice
     if on_beta_blocker:
         meds.add(DrugClass.BETA_BLOCKER)
     return frozenset(meds)

@@ -1,0 +1,134 @@
+{
+  "seed11_population": {
+    "Weather-only heat alert": {
+      "auroc": 0.528,
+      "auprc": 0.266,
+      "warned_30min_ahead_pct": 0.0
+    },
+    "Twin nowcast (no ML)": {
+      "auroc": 0.742,
+      "auprc": 0.496,
+      "warned_30min_ahead_pct": 22.2
+    },
+    "ThermoTwin 60-min forecast": {
+      "auroc": 0.754,
+      "auprc": 0.601,
+      "warned_30min_ahead_pct": 38.9
+    },
+    "Oracle ceiling (knows true current core)": {
+      "auroc": 0.983,
+      "auprc": 0.956,
+      "warned_30min_ahead_pct": 72.2
+    }
+  },
+  "seed11_personal": {
+    "Weather-only heat alert": {
+      "auroc": 0.528,
+      "auprc": 0.266,
+      "warned_30min_ahead_pct": 0.0
+    },
+    "Twin nowcast (no ML)": {
+      "auroc": 0.898,
+      "auprc": 0.764,
+      "warned_30min_ahead_pct": 44.4
+    },
+    "ThermoTwin 60-min forecast": {
+      "auroc": 0.884,
+      "auprc": 0.749,
+      "warned_30min_ahead_pct": 44.4
+    },
+    "Oracle ceiling (knows true current core)": {
+      "auroc": 0.983,
+      "auprc": 0.958,
+      "warned_30min_ahead_pct": 72.2
+    }
+  },
+  "seed42_population": {
+    "Weather-only heat alert": {
+      "auroc": 0.468,
+      "auprc": 0.198,
+      "warned_30min_ahead_pct": 0.0
+    },
+    "Twin nowcast (no ML)": {
+      "auroc": 0.686,
+      "auprc": 0.339,
+      "warned_30min_ahead_pct": 17.6
+    },
+    "ThermoTwin 60-min forecast": {
+      "auroc": 0.566,
+      "auprc": 0.273,
+      "warned_30min_ahead_pct": 17.6
+    },
+    "Oracle ceiling (knows true current core)": {
+      "auroc": 0.97,
+      "auprc": 0.926,
+      "warned_30min_ahead_pct": 58.8
+    }
+  },
+  "seed42_personal": {
+    "Weather-only heat alert": {
+      "auroc": 0.468,
+      "auprc": 0.198,
+      "warned_30min_ahead_pct": 0.0
+    },
+    "Twin nowcast (no ML)": {
+      "auroc": 0.768,
+      "auprc": 0.508,
+      "warned_30min_ahead_pct": 11.8
+    },
+    "ThermoTwin 60-min forecast": {
+      "auroc": 0.685,
+      "auprc": 0.351,
+      "warned_30min_ahead_pct": 29.4
+    },
+    "Oracle ceiling (knows true current core)": {
+      "auroc": 0.966,
+      "auprc": 0.915,
+      "warned_30min_ahead_pct": 64.7
+    }
+  },
+  "seed123_population": {
+    "Weather-only heat alert": {
+      "auroc": 0.592,
+      "auprc": 0.317,
+      "warned_30min_ahead_pct": 0.0
+    },
+    "Twin nowcast (no ML)": {
+      "auroc": 0.779,
+      "auprc": 0.574,
+      "warned_30min_ahead_pct": 23.8
+    },
+    "ThermoTwin 60-min forecast": {
+      "auroc": 0.744,
+      "auprc": 0.652,
+      "warned_30min_ahead_pct": 28.6
+    },
+    "Oracle ceiling (knows true current core)": {
+      "auroc": 0.97,
+      "auprc": 0.944,
+      "warned_30min_ahead_pct": 38.1
+    }
+  },
+  "seed123_personal": {
+    "Weather-only heat alert": {
+      "auroc": 0.592,
+      "auprc": 0.317,
+      "warned_30min_ahead_pct": 0.0
+    },
+    "Twin nowcast (no ML)": {
+      "auroc": 0.812,
+      "auprc": 0.714,
+      "warned_30min_ahead_pct": 19.0
+    },
+    "ThermoTwin 60-min forecast": {
+      "auroc": 0.823,
+      "auprc": 0.693,
+      "warned_30min_ahead_pct": 19.0
+    },
+    "Oracle ceiling (knows true current core)": {
+      "auroc": 0.966,
+      "auprc": 0.937,
+      "warned_30min_ahead_pct": 42.9
+    }
+  }
+}

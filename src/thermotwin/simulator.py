@@ -5,6 +5,7 @@ Heart rate is generated from a separate linear physiology model, not the ECTemp
 quadratic, so the twin is never tested against its own assumptions.
 """
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -104,13 +105,19 @@ def _heart_rate(
     return np.clip(true_hr + noise, HR_MIN, HR_MAX)
 
 
-def simulate_shift(patient: Patient, weather: Weather = HeatDay(), seed: int = 0) -> pd.DataFrame:
+def simulate_shift(
+    patient: Patient,
+    weather: Weather = HeatDay(),
+    seed: int = 0,
+    extra_rest: Sequence[tuple[int, int]] = (),
+) -> pd.DataFrame:
     """Simulate one work shift minute by minute.
 
     Args:
         patient: Worker to simulate.
         weather: Outdoor weather (synthetic HeatDay or a real DayWeather replay).
         seed: Random seed for activity and heart-rate noise.
+        extra_rest: Additional rest breaks as (start minute, duration) for what-if scenarios.
 
     Returns:
         DataFrame with columns minute, hour, air_temp_c, rh, par, core_temp_c,
@@ -118,6 +125,8 @@ def simulate_shift(patient: Patient, weather: Weather = HeatDay(), seed: int = 0
     """
     rng = np.random.default_rng(seed)
     par = activity_schedule(patient.hidden.work_intensity_par, rng)
+    for start, duration in extra_rest:
+        par[max(start, 0) : start + duration] = REST_PAR
     n = par.size
     model = JOS3(
         height=patient.height_m,

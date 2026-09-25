@@ -8,12 +8,15 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.141.1",
     "matplotlib>=3.11.2",
     "numpy>=2.2.6",
     "openpyxl>=3.1.5",
     "pandas>=2.3.3",
+    "pydantic-settings>=2.15.0",
     "pythermalcomfort>=4.6.0",
     "scikit-learn>=1.9.1",
+    "uvicorn[standard]>=0.54.0",
 ]
 
 [build-system]
@@ -22,6 +25,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pytest>=9.1.1",
     "ruff>=0.16.8",
 ]
