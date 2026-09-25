@@ -22,6 +22,7 @@ from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_s
 
 from thermotwin.cohort import Patient, generate_cohort
 from thermotwin.medication import twin_core_temperature
+from thermotwin.personal import PersonalBias, simulated_readings
 from thermotwin.simulator import PRE_SHIFT_REST_MIN, SUN_RADIANT_OFFSET_C, simulate_shift
 from thermotwin.weather import DayWeather, delhi_heatwave_2024
 
@@ -33,6 +34,7 @@ TEST_SHARE = 0.3
 ALERT_PROBABILITY = 0.5
 MIN_LEAD_MIN = 30
 REPORT_PATH = Path("reports/forecast_summary.json")
+PRIOR_SHIFTS = 2
 ASSUMED_CLOTHING_CLO = 0.75
 FORECAST_WIND_M_S = 1.5
 GAGGE_NEUTRAL_CORE_C = 36.8
@@ -56,10 +58,26 @@ FEATURES = [
 ]
 
 
-def shift_features(patient: Patient, day: DayWeather, seed: int) -> pd.DataFrame:
+def learn_bias(
+    patient: Patient, prior_days: list[DayWeather], seed: int, rng: np.random.Generator
+) -> PersonalBias:
+    """Twin learns the worker's bias from earlier shifts with thermometer readings."""
+    bias = PersonalBias()
+    for k, day in enumerate(prior_days):
+        shift = simulate_shift(patient, day, seed=seed * 100 + k)
+        est, _ = twin_core_temperature(shift["heart_rate"].to_numpy(), patient.medications)
+        bias.add_shift(est, simulated_readings(shift["core_temp_c"].to_numpy(), rng))
+    return bias
+
+
+def shift_features(
+    patient: Patient, day: DayWeather, seed: int, bias: PersonalBias | None = None
+) -> pd.DataFrame:
     """One simulated shift turned into per-minute features and the 60-minute label."""
     shift = simulate_shift(patient, day, seed=seed)
     est, var = twin_core_temperature(shift["heart_rate"].to_numpy(), patient.medications)
+    if bias is not None:
+        est = bias.correct(est)
     core = shift["core_temp_c"]
     future_max = core[::-1].rolling(HORIZON_MIN, min_periods=HORIZON_MIN).max()[::-1].shift(-1)
 
@@ -112,13 +130,20 @@ def physics_rise(air_c: np.ndarray, rh: np.ndarray, par: np.ndarray) -> np.ndarr
     return np.asarray(result.t_core) - GAGGE_NEUTRAL_CORE_C
 
 
-def build_dataset(n_patients: int, seed: int) -> pd.DataFrame:
+def build_dataset(n_patients: int, seed: int, learn_personal: bool = False) -> pd.DataFrame:
+    """Simulate one forecast shift per patient, optionally after PRIOR_SHIFTS learning shifts."""
     days = delhi_heatwave_2024()
     rng = np.random.default_rng(seed)
-    frames = [
-        shift_features(p, days[int(rng.integers(len(days)))], seed=seed + i)
-        for i, p in enumerate(generate_cohort(n_patients, seed=seed))
-    ]
+    frames = []
+    for i, patient in enumerate(generate_cohort(n_patients, seed=seed)):
+        picks = rng.choice(len(days), size=PRIOR_SHIFTS + 1, replace=False)
+        bias_rng = np.random.default_rng(seed + i)
+        bias = (
+            learn_bias(patient, [days[j] for j in picks[1:]], seed + i, bias_rng)
+            if learn_personal
+            else None
+        )
+        frames.append(shift_features(patient, days[picks[0]], seed=seed + i, bias=bias))
     return pd.concat(frames, ignore_index=True)
 
 
@@ -166,9 +191,10 @@ def split_by_patient(df: pd.DataFrame, seed: int) -> tuple[pd.DataFrame, pd.Data
     return df[~is_test], df[is_test]
 
 
-def run(n_patients: int, seed: int) -> dict[str, dict[str, float]]:
+def run(n_patients: int, seed: int, learn_personal: bool = False) -> dict[str, dict[str, float]]:
     """Train on some patients, test on the rest; return metrics per method and subgroup."""
-    train, test = split_by_patient(build_dataset(n_patients, seed), seed)
+    data = build_dataset(n_patients, seed, learn_personal)
+    train, test = split_by_patient(data, seed)
 
     weather_only = LogisticRegression(max_iter=1000).fit(
         train[["air_temp_c", "air_temp_in_60", "rh"]], train["label"]
@@ -208,10 +234,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--patients", type=int, default=200)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--learn-personal", action="store_true")
     args = parser.parse_args()
-    report = run(args.patients, args.seed)
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(json.dumps(report, indent=2))
+    report = run(args.patients, args.seed, args.learn_personal)
+    path = REPORT_PATH.with_stem(REPORT_PATH.stem + ("_personal" if args.learn_personal else ""))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(report, indent=2))
     print(pd.DataFrame(report).T.to_string())
 
 

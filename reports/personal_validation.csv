@@ -1,0 +1,5 @@
+scenario,estimator,rmse_c,bias_c,danger_sensitivity,false_alarm_rate
+beta-blocker,Twin (population),0.438,-0.254,0.591,0.134
+beta-blocker,Twin + learned personal bias,0.365,-0.047,0.793,0.379
+no drug,Twin (population),0.355,-0.027,0.835,0.326
+no drug,Twin + learned personal bias,0.336,-0.009,0.846,0.378

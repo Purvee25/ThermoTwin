@@ -72,7 +72,17 @@ We test on 60 patients the model never trained on.
   - a Gagge physics projection
   - anchoring the start with a thermometer reading
   - thermometer spot readings at each break
-- Next step: learn each person's heart-rate offset over time.
+- **Per-person learning (real data).** The twin learns each worker's bias from a few
+  thermometer readings (±0.3 °C) on *earlier* shifts, then corrects new shifts without any
+  reading on the day. Tested on PROSPIE, learning only from a participant's other trials:
+
+  | Scenario | Error before → after | Danger caught | False alarms |
+  |---|---|---|---|
+  | No drug | 0.355 → **0.336 °C** | 84% → 85% | 33% → 38% |
+  | Beta-blocker | 0.438 → **0.365 °C** (bias −0.25 → −0.05) | 59% → **79%** | 13% → 38% |
+
+  A linear "rest + activity + heat" heart-rate model was also tried and rejected
+  (0.49–0.98 °C vs 0.36 °C). Multi-seed forecast results with learning are in progress.
 
 ```bash
 uv run python -m thermotwin.forecast --patients 200
@@ -114,6 +124,8 @@ results above as the headline numbers.
 | `fusion.py` | Participant-held-out ECTemp validation and skin-temperature fusion test |
 | `weather.py` | Open-Meteo historical weather (cached), Delhi heatwave 2024 |
 | `forecast.py` | 60-minute danger forecast, baselines, oracle ceiling, lead times |
+| `personal.py` | Per-person bias learned from earlier shifts' thermometer readings |
+| `personal_validation.py` | Real-data test of per-person learning (leave-own-trial-out) |
 | `real_ablation.py` | Beta-blocker ablation on real heart rate and core temperature |
 
 ## Roadmap
@@ -124,7 +136,8 @@ results above as the headline numbers.
 - [ ] Synthea cohort with a custom beta-blocker module, exported as FHIR
 - [x] Real heatwave replay from Open-Meteo historical weather
 - [x] 60-minute forecast with baselines and oracle ceiling
-- [ ] Per-person heart-rate offset learning (closes the gap to the oracle); conformal intervals
+- [x] Per-person bias learning across shifts (validated on real data)
+- [ ] Conformal intervals; reduce false alarms
 - [ ] Kidney-injury warning, acclimatisation tracking, pre-summer medication review
 - [ ] FastAPI service and React clinician dashboard with a what-if simulator
 - [ ] Docker Compose, architecture PDF, demo video
