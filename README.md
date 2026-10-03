@@ -6,6 +6,19 @@ Built for the Happiest Health *Digital Twin Challenge 2026*.
 
 > Research prototype on synthetic data. Not a medical device.
 
+## Submission at a glance
+
+| | |
+|---|---|
+| **Challenge** | Happiest Health Digital Twin Challenge 2026 |
+| **Problem** | 315 million hypertensive Indians work outdoors; their BP medicines change how heat affects them |
+| **Twin input** | Wearable heart rate + EHR medication list + real heatwave weather |
+| **Key novelty** | Medication-aware ECTemp filter: corrects for beta-blocker HR blunting before estimating core temperature |
+| **Real-data result** | 62% of danger minutes caught vs 18% for HR-only — validated on 22 participants, 99 real heat trials (PROSPIE) |
+| **Stack** | Python · FastAPI · React 19 · Docker Compose |
+| **Architecture** | [`docs/ThermoTwin_architecture.pdf`](docs/ThermoTwin_architecture.pdf) |
+| **Presentation** | [`docs/ThermoTwin_presentation.pdf`](docs/ThermoTwin_presentation.pdf) |
+
 ## The idea in one paragraph
 
 About 315 million Indian adults have hypertension, and millions of them work outdoors through
@@ -13,6 +26,20 @@ heatwaves. Their blood-pressure medicines change how their bodies handle heat. B
 blunt the heart-rate rise that wearable heat models rely on, so those models under-read core
 temperature for exactly these patients. ThermoTwin reads the patient's medication record and
 corrects its physiology model before estimating and forecasting heat strain.
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Physics model | ECTemp extended Kalman filter (Buller 2013) + Gagge two-node thermoregulation |
+| Ground truth | JOS-3 multi-node thermoregulation (`pythermalcomfort`) |
+| Forecaster | `HistGradientBoostingClassifier` (scikit-learn) |
+| Real-data validation | PROSPIE dataset (22 participants, 99 trials, Loughborough, CC BY-NC 4.0) |
+| Weather | Open-Meteo historical API — real Delhi heatwave May–June 2024 |
+| Backend | FastAPI + Pydantic, `uv`, `ruff`, `pytest` |
+| Frontend | React 19 + Vite + TypeScript + Recharts + TanStack Query + zod |
+| Deployment | Docker Compose (non-root API + nginx dashboard) |
+| CI | GitHub Actions (Python + dashboard jobs) |
 
 ## Run everything with Docker
 
@@ -96,7 +123,12 @@ Mean over 3 seeds (11, 42, 123), 200 patients each, tested on unseen patients:
   | Beta-blocker | 0.438 → **0.365 °C** (bias −0.25 → −0.05) | 59% → **79%** | 13% → 38% |
 
   A linear "rest + activity + heat" heart-rate model was also tried and rejected
-  (0.49–0.98 °C vs 0.36 °C). Across 3 seeds this lifts forecast AUROC from 0.69 to 0.80 (table above).
+  (0.49–0.98 °C vs 0.36 °C).
+
+**Honest reading of the table:** the main AUROC gain (0.69 → 0.80) comes from per-person bias
+correction, not from the ML forecaster itself (which actually sits below the nowcast at 0.69 vs 0.74).
+The ML model's practical value is *lead time*: it warns 31% of episodes ≥30 minutes ahead vs 21%
+for the nowcast, giving workers time to seek shade before they reach danger.
 
 ```bash
 uv run python -m thermotwin.forecast --patients 200                  # population twin
@@ -118,7 +150,7 @@ hypertensive outdoor workers. For each worker it shows:
   - diuretic + ACE inhibitor/ARB + NSAID "triple whammy" (Lapi et al., BMJ 2013)
   - eGFR falling ≥ 5 mL/min/1.73 m² a year or below 60 (KDIGO 2024)
   - beta-blockers masking heat strain in heart rate (ThermoTwin real-data ablation)
-  - ACE inhibitor/ARB/calcium-channel blocker heat-illness risk (2026 cohort study)
+  - ACE inhibitor/ARB/calcium-channel blocker/thiazide diuretic heat-illness risk (2026 cohort study)
   - heat strain predicted by the twin's heatwave replay (NDMA guidance)
 
 ```bash

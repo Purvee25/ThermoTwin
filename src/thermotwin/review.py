@@ -17,7 +17,12 @@ HIGH_HEAT_MINUTES = 60
 MODERATE_HEAT_MINUTES = 15
 HIGH_PRIORITY_SCORE = 5
 MEDIUM_PRIORITY_SCORE = 3
-RAAS_OR_CCB = frozenset({DrugClass.ACE_INHIBITOR, DrugClass.ARB, DrugClass.CALCIUM_CHANNEL_BLOCKER})
+HEAT_ILLNESS_DRUGS = frozenset({
+    DrugClass.ACE_INHIBITOR,
+    DrugClass.ARB,
+    DrugClass.CALCIUM_CHANNEL_BLOCKER,
+    DrugClass.THIAZIDE_DIURETIC,
+})
 
 
 class Priority(StrEnum):
@@ -73,10 +78,10 @@ def _kidney(patient: Patient) -> Finding | None:
         code="kidney_decline",
         title="Kidney function falling" if drop >= RAPID_EGFR_DECLINE else "Reduced eGFR",
         detail=f"eGFR {kidney.egfr_last_year:.0f} → {kidney.egfr_now:.0f} mL/min/1.73 m² "
-        f"in a year ({kidney.annual_change_pct:+.0f}%).",
+        f"in a year ({kidney.annual_change_pct:+.0f}%). Confirm with a repeat test.",
         action="Recheck eGFR and electrolytes before summer; review diuretic dose and "
-        "hydration advice.",
-        evidence="KDIGO 2024 CKD guideline (rapid progression > 5 mL/min/1.73 m²/yr)",
+        "hydration advice; avoid NSAIDs in heat.",
+        evidence="KDIGO 2024 CKD guideline (rapid progression ≥ 5 mL/min/1.73 m²/yr)",
         points=2,
     )
 
@@ -96,7 +101,7 @@ def _beta_blocker(patient: Patient) -> Finding | None:
 
 
 def _raas_ccb(patient: Patient) -> Finding | None:
-    drugs = sorted(d.value.replace("_", " ") for d in patient.medications & RAAS_OR_CCB)
+    drugs = sorted(d.value.replace("_", " ") for d in patient.medications & HEAT_ILLNESS_DRUGS)
     if not drugs:
         return None
     return Finding(

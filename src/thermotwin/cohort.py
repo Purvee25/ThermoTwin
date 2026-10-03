@@ -13,7 +13,7 @@ from thermotwin.medication import DrugClass
 
 BETA_BLOCKER_SHARE = 0.5
 NSAID_SHARE = 0.3
-FAST_KIDNEY_DECLINE_SHARE = 0.2
+FAST_KIDNEY_DECLINE_SHARE = 0.05  # ~5% of hypertensive patients have rapid CKD progression
 EHR_STREAM = 1
 OTHER_ANTIHYPERTENSIVES = (
     DrugClass.ACE_INHIBITOR,
