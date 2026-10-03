@@ -17,6 +17,9 @@ from thermotwin.prospie import load_trials
 
 DANGER_CORE_C = 38.0
 ALERT_Z = 1.0
+# NOTE: blunt() draws from the same distribution as the cohort's beta-blocker priors,
+# so the twin undoes a drug effect it was designed to correct — results are optimistic
+# by construction. A single SEED=42 is used; multi-seed sensitivity is a future step.
 SEED = 42
 REPORT_PATH = paths.REPORTS_DIR / "real_ablation_summary.csv"
 BETA_BLOCKER = frozenset({DrugClass.BETA_BLOCKER})

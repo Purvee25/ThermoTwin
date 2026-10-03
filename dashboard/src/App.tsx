@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api } from './api'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { PatientList } from './components/PatientList'
 import { ReviewScreen } from './components/ReviewScreen'
 import { TwinView } from './components/TwinView'
@@ -31,6 +32,7 @@ export default function App() {
   const active = patients.data?.find((p) => p.patient_id === activeId) ?? null
 
   return (
+    <ErrorBoundary>
     <div className="app">
       <header className="header">
         <div className="brand">
@@ -107,5 +109,6 @@ export default function App() {
 
       {meta.data && <p className="footer">{meta.data.disclaimer}</p>}
     </div>
+    </ErrorBoundary>
   )
 }

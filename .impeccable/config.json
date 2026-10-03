@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-03T17:43:29.315Z",
+        "reason": "clinical dashboard: readability and professionalism outweigh personality; Inter is appropriate for medical UIs"
+      }
+    ]
+  }
+}

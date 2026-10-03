@@ -43,7 +43,8 @@ def test_timeline_has_band_around_estimate(client):
 
     points = client.get(f"/patients/{pid}/timeline").json()["points"]
 
-    assert len(points) > 300
+    from thermotwin.simulator import PRE_SHIFT_REST_MIN, SHIFT_MIN
+    assert len(points) == PRE_SHIFT_REST_MIN + SHIFT_MIN
     assert all(p["band_low_c"] <= p["twin_core_c"] <= p["band_high_c"] for p in points)
 
 
@@ -75,6 +76,24 @@ def test_whatif_rejects_start_outside_shift(client):
             f"/patients/{pid}/whatif", json={"start_minute": start, "duration_min": 20}
         )
         assert response.status_code == 422
+
+
+def test_service_raises_on_missing_model(tmp_path):
+    from thermotwin.api.service import TwinService
+
+    with pytest.raises(FileNotFoundError, match="missing"):
+        TwinService(model_path=tmp_path / "nonexistent.joblib")
+
+
+def test_pre_warmup_timeline_points_have_null_risk(client):
+    pid = client.get("/patients").json()[0]["patient_id"]
+
+    points = client.get(f"/patients/{pid}/timeline").json()["points"]
+    pre_warmup = [p for p in points if p["minute"] < 35]  # before WARMUP_MIN kicks in
+
+    assert pre_warmup, "expected some pre-warmup points"
+    assert all(p["risk_60"] is None for p in pre_warmup)
+    assert all(p["alert"] is False for p in pre_warmup)
 
 
 def test_whatif_validates_duration(client):

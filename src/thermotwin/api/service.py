@@ -183,7 +183,11 @@ class TwinService:
             sex=demo.patient.sex,
             occupation=demo.occupation,
             medications=[m.value for m in meds],
-            flags=[MedicationFlag(drug_class=m.value, note=FLAG_NOTES[m]) for m in meds],
+            flags=[
+                MedicationFlag(drug_class=m.value, note=FLAG_NOTES[m])
+                for m in meds
+                if m in FLAG_NOTES
+            ],
             learned_bias_c=round(demo.bias.bias_c, 3),
             risk_now=now,
             p_above_now=above,
