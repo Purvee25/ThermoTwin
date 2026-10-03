@@ -194,10 +194,14 @@ function buildDeck() {
   ], { x: 0.5, y: 1.55, w: 4.1, h: 2.4, fontSize: 15, paraSpaceAfter: 10, valign: "top" });
   text(s, "Tested on real heat-trial data (PROSPIE) with a simulated beta-blocker effect on heart rate.", { x: 0.5, y: 4.2, w: 4.1, h: 0.6, fontSize: 11, color: C.muted, italic: true });
   shapeBars(s, {
-    x: 5.2, y: 1.5, w: 4.2, h: 3.4, labels: ["Heart-rate model", "ThermoTwin"], values: [18, 62],
-    colors: [C.muted, C.heat], max: 100, format: (v) => `${v}%`, title: "Danger minutes (≥ 38 °C) caught, β-blocker patients",
+    x: 5.2, y: 1.3, w: 4.2, h: 1.9, labels: ["HR model", "ThermoTwin"], values: [18, 62],
+    colors: [C.muted, C.heat], max: 100, format: (v) => `${v}%`, title: "Danger minutes (≥ 38 °C) caught",
   });
-  s.addNotes("This is the core insight. On real heat-trial data, a plain heart-rate model caught 18% of dangerous minutes for a beta-blocked patient. ThermoTwin caught 62%, with an 8% false-alarm rate.");
+  shapeBars(s, {
+    x: 5.2, y: 3.3, w: 4.2, h: 1.6, labels: ["HR model", "ThermoTwin"], values: [0, 8],
+    colors: [C.muted, C.blue], max: 20, format: (v) => `${v}%`, title: "False-alarm rate",
+  });
+  s.addNotes("This is the core insight. On real heat-trial data, a plain heart-rate model caught 18% of dangerous minutes for a beta-blocked patient. ThermoTwin caught 62%, with an 8% false-alarm rate. The false-alarm chart shows the trade-off: we catch more but do raise more alerts per shift.");
 
   // 4. Solution
   s = pres.addSlide();
@@ -287,7 +291,7 @@ function buildDeck() {
     { text: "31%", options: { fontFace: HEAD, fontSize: 30, bold: true, color: C.blue, breakLine: true } },
     { text: "of danger episodes warned ≥ 30 min ahead (weather-only alert: 0%)", options: { fontSize: 12 } },
   ], { x: 7.2, y: 1.7, w: 2.15, h: 3.2, valign: "top" });
-  s.addNotes("Weather-only alerts are near chance for individuals. Learning each worker adds about 0.11 AUROC. The oracle row shows the remaining gap is in estimating current temperature: our next research step.");
+  s.addNotes("The ML forecaster (0.69) sits just below the nowcast (0.74) — honestly, not much gain from the classifier alone. The real lift is per-person bias correction (+0.11 AUROC). But the ML model's value is lead time: it warns 31% of episodes 30+ minutes in advance, versus 21% for the nowcast. That extra 10 minutes is time to seek shade before reaching 38 °C.");
 
   // 9. Dashboard
   s = pres.addSlide();
