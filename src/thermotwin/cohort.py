@@ -11,7 +11,8 @@ import numpy as np
 
 from thermotwin.medication import DrugClass
 
-BETA_BLOCKER_SHARE = 0.5
+# ~20% of hypertensive Indian patients on beta-blockers (PURE India sub-study, Anchala et al. 2014)
+BETA_BLOCKER_SHARE = 0.20
 NSAID_SHARE = 0.3
 FAST_KIDNEY_DECLINE_SHARE = 0.05  # ~5% of hypertensive patients have rapid CKD progression
 EHR_STREAM = 1

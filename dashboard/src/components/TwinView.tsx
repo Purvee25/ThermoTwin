@@ -17,9 +17,6 @@ import { WhatIfPanel } from './WhatIfPanel'
 
 const ALERT_PERCENT = 50
 
-function cssColor(name: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-}
 const X_TICK_EVERY = 60
 
 interface Row extends Point {
@@ -48,8 +45,8 @@ interface Props {
 
 export function TwinView({ patient, minute, dangerCoreC }: Props) {
   const [showTruth, setShowTruth] = useState(false)
-  const danger = cssColor('--danger')
-  const accent = cssColor('--accent')
+  const danger = useMemo(() => getComputedStyle(document.documentElement).getPropertyValue('--danger').trim(), [])
+  const accent = useMemo(() => getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(), [])
   const timeline = useQuery({
     queryKey: ['timeline', patient.patient_id],
     queryFn: () => api.timeline(patient.patient_id),

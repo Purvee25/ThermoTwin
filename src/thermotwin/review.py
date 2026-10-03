@@ -22,6 +22,7 @@ HEAT_ILLNESS_DRUGS = frozenset({
     DrugClass.ARB,
     DrugClass.CALCIUM_CHANNEL_BLOCKER,
     DrugClass.THIAZIDE_DIURETIC,
+    DrugClass.LOOP_DIURETIC,
 })
 
 
@@ -80,7 +81,7 @@ def _kidney(patient: Patient) -> Finding | None:
         detail=f"eGFR {kidney.egfr_last_year:.0f} → {kidney.egfr_now:.0f} mL/min/1.73 m² "
         f"in a year ({kidney.annual_change_pct:+.0f}%). Confirm with a repeat test.",
         action="Recheck eGFR and electrolytes before summer; review diuretic dose and "
-        "hydration advice; avoid NSAIDs in heat.",
+        "hydration advice; avoid NSAIDs in heat. Review ACE inhibitor/ARB dose at eGFR < 45.",
         evidence="KDIGO 2024 CKD guideline (rapid progression ≥ 5 mL/min/1.73 m²/yr)",
         points=2,
     )
@@ -94,8 +95,8 @@ def _beta_blocker(patient: Patient) -> Finding | None:
         title="Heart rate under-reports heat strain",
         detail="Beta-blockers blunt the heart-rate rise that wearables use to estimate heat.",
         action="Do not rely on heart-rate alerts alone; schedule fixed shade breaks.",
-        evidence="ThermoTwin real-data ablation: HR-only model caught 18% vs twin 62% of "
-        "danger minutes",
+        evidence="Casa et al., ACSM 2015 — exertional heat stroke risk factors; "
+        "ThermoTwin ablation: HR-only caught 18% vs twin 62% of danger minutes",
         points=1,
     )
 

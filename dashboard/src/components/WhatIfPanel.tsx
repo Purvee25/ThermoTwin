@@ -57,6 +57,7 @@ function Comparison({ baseline, scenario }: { baseline: Scenario; scenario: Scen
     ['Alert minutes', String(baseline.alert_minutes), String(scenario.alert_minutes)],
     ['Minutes truly ≥38 °C', String(baseline.true_danger_minutes), String(scenario.true_danger_minutes)],
   ] as const
+  const peakUnchanged = baseline.peak_twin_core_c === scenario.peak_twin_core_c
   return (
     <div className="compare">
       {items.map(([label, before, after]) => (
@@ -67,6 +68,12 @@ function Comparison({ baseline, scenario }: { baseline: Scenario; scenario: Scen
           </div>
         </div>
       ))}
+      {peakUnchanged && (
+        <p className="hint" style={{ gridColumn: '1 / -1', marginTop: 4 }}>
+          Peak unchanged: by this point in the shift the thermal load is already committed.
+          Earlier rest breaks (before peak heat) reduce the peak more effectively.
+        </p>
+      )}
     </div>
   )
 }

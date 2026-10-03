@@ -24,6 +24,7 @@ class DrugClass(StrEnum):
     ARB = "arb"
     CALCIUM_CHANNEL_BLOCKER = "calcium_channel_blocker"
     THIAZIDE_DIURETIC = "thiazide_diuretic"
+    LOOP_DIURETIC = "loop_diuretic"
     NSAID = "nsaid"
 
 

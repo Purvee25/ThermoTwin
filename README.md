@@ -204,6 +204,14 @@ results above as the headline numbers.
 | `api/` | FastAPI service: patients, timelines, what-if, review |
 | `real_ablation.py` | Beta-blocker ablation on real heart rate and core temperature |
 
+## Known limitations
+
+- **Beta-blocker drug effect is simulated.** The PROSPIE participants were healthy volunteers; no real beta-blocker users were in the dataset. The 62% vs 18% headline uses a simulated blunting drawn from the same population priors the twin corrects — result is optimistic by construction. A prospective trial with real beta-blocker users is the next validation step.
+- **Diabetes not modelled.** ~40% of hypertensive Indians have co-morbid diabetes. Sulfonylureas cause hypoglycaemia (impairs thermoregulation); metformin requires caution with dehydration (AKI risk). Not included in the current drug model.
+- **Beta-blocker class not differentiated.** Cardioselective agents (atenolol, metoprolol — dominant in India) blunt exercise HR less than non-selective (propranolol). A drug-specific prior table would improve correction accuracy.
+- **Cohort is synthetic.** All patients are generated from statistical distributions, not from a real EHR dataset.
+- **Not a medical device.** Priority scores are unvalidated triage heuristics.
+
 ## Roadmap
 
 - [x] Core-temperature filter, medication correction, ground-truth simulator, ablation

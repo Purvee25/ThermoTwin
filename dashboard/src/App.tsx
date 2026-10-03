@@ -47,11 +47,11 @@ export default function App() {
         )}
       </header>
 
-      <nav className="tabs" aria-label="Views">
-        <button type="button" aria-pressed={view === 'twin'} onClick={() => setView('twin')}>
+      <nav className="tabs" role="tablist" aria-label="Views">
+        <button type="button" role="tab" aria-selected={view === 'twin'} onClick={() => setView('twin')}>
           Live twin
         </button>
-        <button type="button" aria-pressed={view === 'review'} onClick={() => setView('review')}>
+        <button type="button" role="tab" aria-selected={view === 'review'} onClick={() => setView('review')}>
           Pre-summer review
         </button>
       </nav>

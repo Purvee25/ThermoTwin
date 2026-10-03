@@ -57,6 +57,7 @@ FLAG_NOTES = {
     DrugClass.ARB: "Higher heat-illness risk in heatwaves (2026 cohort study)",
     DrugClass.CALCIUM_CHANNEL_BLOCKER: "Higher heat-illness risk in heatwaves (2026 cohort study)",
     DrugClass.THIAZIDE_DIURETIC: "Watch hydration and kidney function; avoid NSAIDs",
+    DrugClass.LOOP_DIURETIC: "Higher electrolyte and volume loss in heat; monitor renal function",
     DrugClass.NSAID: "With a diuretic and ACE inhibitor/ARB: kidney-injury risk in heat",
 }
 
@@ -244,7 +245,7 @@ class TwinService:
                 activity_par=round(row.par, 2),
                 risk_60=None if np.isnan(row.risk_60) else round(row.risk_60, 3),
                 p_above_now=round(row.p_above_now, 3),
-                alert=bool(row.risk_60 >= ALERT_PROBABILITY),
+                alert=bool(not np.isnan(row.risk_60) and row.risk_60 >= ALERT_PROBABILITY),
             )
             for row, b in zip(df.itertuples(), band, strict=True)
         ]
