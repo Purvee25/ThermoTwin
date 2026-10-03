@@ -4,6 +4,10 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from thermotwin.simulator import PRE_SHIFT_REST_MIN, SHIFT_MIN
+
+LAST_SHIFT_MINUTE = PRE_SHIFT_REST_MIN + SHIFT_MIN - 1
+
 RiskStatus = Literal["red", "amber", "green"]
 
 
@@ -51,7 +55,11 @@ class Timeline(BaseModel):
 
 
 class WhatIfRequest(BaseModel):
-    start_minute: int = Field(ge=0, description="Minute of the shift timeline to start resting")
+    start_minute: int = Field(
+        ge=PRE_SHIFT_REST_MIN,
+        le=LAST_SHIFT_MINUTE,
+        description="Minute of the shift timeline to start resting",
+    )
     duration_min: int = Field(ge=5, le=60)
 
 

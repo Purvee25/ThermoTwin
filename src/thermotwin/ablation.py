@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from thermotwin import paths
 from thermotwin.cohort import Patient, generate_cohort
 from thermotwin.ectemp import estimate_core_temperature
 from thermotwin.medication import twin_core_temperature
@@ -24,7 +25,7 @@ from thermotwin.simulator import PRE_SHIFT_REST_MIN, simulate_shift
 
 DANGER_CORE_C = 38.0
 ALERT_Z = 1.0
-REPORTS_DIR = Path("reports")
+REPORTS_DIR = paths.REPORTS_DIR
 
 
 @dataclass(frozen=True)

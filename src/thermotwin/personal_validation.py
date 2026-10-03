@@ -8,11 +8,10 @@ first 30 minutes, with and without a simulated beta-blocker effect on heart rate
 Run: uv run python -m thermotwin.personal_validation
 """
 
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
+from thermotwin import paths
 from thermotwin.ectemp import estimate_core_temperature
 from thermotwin.medication import DrugClass, twin_core_temperature
 from thermotwin.personal import PersonalBias, simulated_readings
@@ -23,7 +22,7 @@ EVAL_FROM_MIN = 30
 DANGER_CORE_C = 38.0
 ALERT_Z = 1.0
 SEED = 42
-REPORT_PATH = Path("reports/personal_validation.csv")
+REPORT_PATH = paths.REPORTS_DIR / "personal_validation.csv"
 BETA_BLOCKER = frozenset({DrugClass.BETA_BLOCKER})
 
 

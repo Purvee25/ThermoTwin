@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
+from thermotwin import paths
 from thermotwin.api.schemas import (
     MedicationFlag,
     Meta,
@@ -41,7 +42,7 @@ DEMO_SEED = 2026
 DEMO_DATE = "2024-05-28"
 LEARNING_DATES = ("2024-05-25", "2024-05-31")
 INTERVAL_Z = 1.2816  # two-sided 80% interval
-VALIDATION_PATH = Path("reports/personal_validation.csv")
+VALIDATION_PATH = paths.REPORTS_DIR / "personal_validation.csv"
 AMBER_PROBABILITY = 0.25
 DISCLAIMER = "Research prototype on simulated patients and real weather. Not a medical device."
 
@@ -79,8 +80,12 @@ def load_empirical_rmse(path: Path = VALIDATION_PATH) -> dict[bool, float]:
 
     The Kalman variance is over-confident, so the dashboard band uses measured error instead.
     """
-    rows = {r["scenario"]: r for r in csv.DictReader(path.open())
-            if r["estimator"] == "Twin + learned personal bias"}  # fmt: skip
+    with path.open(newline="") as handle:
+        rows = {
+            r["scenario"]: r
+            for r in csv.DictReader(handle)
+            if r["estimator"] == "Twin + learned personal bias"
+        }
     return {True: float(rows["beta-blocker"]["rmse_c"]), False: float(rows["no drug"]["rmse_c"])}
 
 

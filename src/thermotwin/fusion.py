@@ -9,13 +9,13 @@ Run: uv run python -m thermotwin.fusion
 
 import json
 from dataclasses import asdict, dataclass
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import GroupKFold
 
+from thermotwin import paths
 from thermotwin.ectemp import estimate_core_temperature
 from thermotwin.prospie import load_trials
 
@@ -23,8 +23,8 @@ FEATURES = ["ectemp_c", "skin_temp_c", "skin_rise_c"]
 N_FOLDS = 5
 RIDGE_ALPHA = 1.0
 DANGER_CORE_C = 38.0
-MODEL_PATH = Path("models/fusion.json")
-REPORT_PATH = Path("reports/prospie_validation.csv")
+MODEL_PATH = paths.MODELS_DIR / "fusion.json"
+REPORT_PATH = paths.REPORTS_DIR / "prospie_validation.csv"
 
 
 @dataclass(frozen=True)

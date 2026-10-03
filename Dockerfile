@@ -7,12 +7,13 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-install-project
+    uv sync --frozen --no-default-groups --no-install-project
 
-COPY README.md ./
+# Placeholder README: package metadata needs one, and doc edits must not bust the cache.
+RUN echo "ThermoTwin" > README.md
 COPY src ./src
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-editable
+    uv sync --frozen --no-default-groups --no-editable
 
 FROM build AS train
 COPY data/weather ./data/weather
@@ -28,7 +29,8 @@ COPY reports/personal_validation.csv ./reports/personal_validation.csv
 USER app
 
 # numba (via pythermalcomfort) caches compiled code; site-packages is read-only for app.
-ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 NUMBA_CACHE_DIR=/tmp/numba-cache
+ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 NUMBA_CACHE_DIR=/tmp/numba-cache \
+    THERMOTWIN_ROOT=/app
 EXPOSE 8010
 HEALTHCHECK --interval=15s --timeout=5s --start-period=90s --retries=5 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=4)"

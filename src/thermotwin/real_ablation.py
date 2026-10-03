@@ -7,11 +7,10 @@ beta-blocker response. The twin sees just the medication list and population pri
 Run: uv run python -m thermotwin.real_ablation
 """
 
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
+from thermotwin import paths
 from thermotwin.ectemp import estimate_core_temperature
 from thermotwin.medication import RESTING_WINDOW_MIN, DrugClass, twin_core_temperature
 from thermotwin.prospie import load_trials
@@ -19,7 +18,7 @@ from thermotwin.prospie import load_trials
 DANGER_CORE_C = 38.0
 ALERT_Z = 1.0
 SEED = 42
-REPORT_PATH = Path("reports/real_ablation_summary.csv")
+REPORT_PATH = paths.REPORTS_DIR / "real_ablation_summary.csv"
 BETA_BLOCKER = frozenset({DrugClass.BETA_BLOCKER})
 
 

@@ -21,6 +21,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
 
+from thermotwin import paths
 from thermotwin.cohort import Patient, generate_cohort
 from thermotwin.medication import twin_core_temperature
 from thermotwin.personal import PersonalBias, simulated_readings
@@ -34,9 +35,9 @@ WARMUP_MIN = 15
 TEST_SHARE = 0.3
 ALERT_PROBABILITY = 0.5
 MIN_LEAD_MIN = 30
-REPORT_PATH = Path("reports/forecast_summary.json")
+REPORT_PATH = paths.REPORTS_DIR / "forecast_summary.json"
 PRIOR_SHIFTS = 2
-MODEL_PATH = Path("models/forecast.joblib")
+MODEL_PATH = paths.MODELS_DIR / "forecast.joblib"
 ASSUMED_CLOTHING_CLO = 0.75
 FORECAST_WIND_M_S = 1.5
 GAGGE_NEUTRAL_CORE_C = 36.8

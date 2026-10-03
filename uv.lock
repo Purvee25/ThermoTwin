@@ -1184,17 +1184,21 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
-    { name = "matplotlib" },
+    { name = "joblib" },
     { name = "numpy" },
-    { name = "openpyxl" },
     { name = "pandas" },
     { name = "pydantic-settings" },
     { name = "pythermalcomfort" },
     { name = "scikit-learn" },
+    { name = "scipy" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
 [package.dev-dependencies]
+analysis = [
+    { name = "matplotlib" },
+    { name = "openpyxl" },
+]
 dev = [
     { name = "httpx" },
     { name = "pytest" },
@@ -1204,17 +1208,21 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.141.1" },
-    { name = "matplotlib", specifier = ">=3.11.2" },
+    { name = "joblib", specifier = ">=1.5" },
     { name = "numpy", specifier = ">=2.2.6" },
-    { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "pydantic-settings", specifier = ">=2.15.0" },
     { name = "pythermalcomfort", specifier = ">=4.6.0" },
     { name = "scikit-learn", specifier = ">=1.9.1" },
+    { name = "scipy", specifier = ">=1.16" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0" },
 ]
 
 [package.metadata.requires-dev]
+analysis = [
+    { name = "matplotlib", specifier = ">=3.11.2" },
+    { name = "openpyxl", specifier = ">=3.1.5" },
+]
 dev = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "pytest", specifier = ">=9.1.1" },

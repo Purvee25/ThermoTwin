@@ -8,13 +8,14 @@ import json
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from pathlib import Path
 
 import numpy as np
 
+from thermotwin import paths
+
 ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
 HOURLY_VARS = "temperature_2m,relative_humidity_2m,wind_speed_10m,shortwave_radiation"
-CACHE_DIR = Path("data/weather")
+CACHE_DIR = paths.DATA_DIR / "weather"
 KMH_TO_MS = 1 / 3.6
 MIN_WIND_M_S = 0.5
 HOURS_PER_DAY = 24

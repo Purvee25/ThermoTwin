@@ -67,6 +67,16 @@ def test_whatif_rest_break_does_not_raise_true_heat(client):
     assert body["scenario"]["true_danger_minutes"] <= body["baseline"]["true_danger_minutes"]
 
 
+def test_whatif_rejects_start_outside_shift(client):
+    pid = client.get("/patients").json()[0]["patient_id"]
+
+    for start in (0, 10_000):
+        response = client.post(
+            f"/patients/{pid}/whatif", json={"start_minute": start, "duration_min": 20}
+        )
+        assert response.status_code == 422
+
+
 def test_whatif_validates_duration(client):
     pid = client.get("/patients").json()[0]["patient_id"]
 

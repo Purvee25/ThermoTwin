@@ -12,8 +12,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from thermotwin import paths
+
 DOWNLOAD_URL = "https://ndownloader.figshare.com/files/47227096"
-RAW_PATH = Path("data/raw/prospie.xlsx")
+RAW_PATH = paths.DATA_DIR / "raw" / "prospie.xlsx"
 MISSING = 9999
 HEADER_ROWS = 2
 MIN_TRIAL_MINUTES = 30
