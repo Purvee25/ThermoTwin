@@ -59,6 +59,8 @@ FLAG_NOTES = {
     DrugClass.THIAZIDE_DIURETIC: "Watch hydration and kidney function; avoid NSAIDs",
     DrugClass.LOOP_DIURETIC: "Higher electrolyte and volume loss in heat; monitor renal function",
     DrugClass.NSAID: "With a diuretic and ACE inhibitor/ARB: kidney-injury risk in heat",
+    DrugClass.METFORMIN: "Hold if dehydrated or vomiting in heat; AKI risk with diuretics/RAAS",
+    DrugClass.SULFONYLUREA: "Sweating in heat mimics hypoglycaemia; carry glucose tablets",
 }
 
 

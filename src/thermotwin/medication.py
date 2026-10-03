@@ -26,6 +26,8 @@ class DrugClass(StrEnum):
     THIAZIDE_DIURETIC = "thiazide_diuretic"
     LOOP_DIURETIC = "loop_diuretic"
     NSAID = "nsaid"
+    METFORMIN = "metformin"
+    SULFONYLUREA = "sulfonylurea"
 
 
 @dataclass(frozen=True)

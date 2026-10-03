@@ -129,6 +129,43 @@ def _heat_strain(heat_minutes: int) -> Finding | None:
     )
 
 
+def _metformin_aki(patient: Patient) -> Finding | None:
+    meds = patient.medications
+    if DrugClass.METFORMIN not in meds:
+        return None
+    dehydration_risk = meds & {
+        DrugClass.THIAZIDE_DIURETIC,
+        DrugClass.LOOP_DIURETIC,
+        DrugClass.ACE_INHIBITOR,
+        DrugClass.ARB,
+    }
+    if not dehydration_risk:
+        return None
+    return Finding(
+        code="metformin_aki",
+        title="Metformin and dehydration risk",
+        detail="Dehydration in heat combined with a diuretic or RAAS agent can precipitate AKI, "
+        "leading to metformin accumulation and lactic acidosis.",
+        action="Hold metformin if vomiting or unable to drink; recheck eGFR.",
+        evidence="MHRA guidance 2020; KDIGO AKI 2024",
+        points=2,
+    )
+
+
+def _sulfonylurea(patient: Patient) -> Finding | None:
+    if DrugClass.SULFONYLUREA not in patient.medications:
+        return None
+    return Finding(
+        code="sulfonylurea_hypoglycaemia",
+        title="Sulfonylurea and heat hypoglycaemia",
+        detail="Sweating in heat mimics hypoglycaemia symptoms; hypoglycaemia impairs "
+        "thermoregulation.",
+        action="Carry glucose tablets; monitor for confusion in heat.",
+        evidence="Cryer et al., Diabetes Care 2003; UK hypoglycaemia study group",
+        points=1,
+    )
+
+
 def review_patient(patient: Patient, heat_minutes: int) -> Review:
     """Build the pre-summer review for one patient.
 
@@ -146,6 +183,8 @@ def review_patient(patient: Patient, heat_minutes: int) -> Review:
         _heat_strain(heat_minutes),
         _beta_blocker(patient),
         _raas_ccb(patient),
+        _metformin_aki(patient),
+        _sulfonylurea(patient),
     )
     findings = tuple(sorted((f for f in checks if f), key=lambda f: -f.points))
     score = sum(f.points for f in findings)

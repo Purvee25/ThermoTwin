@@ -14,6 +14,7 @@ from thermotwin.medication import DrugClass
 # ~20% of hypertensive Indian patients on beta-blockers (PURE India sub-study, Anchala et al. 2014)
 BETA_BLOCKER_SHARE = 0.20
 NSAID_SHARE = 0.3
+DIABETES_SHARE = 0.35  # ~35% of hypertensive patients in India have co-morbid diabetes
 FAST_KIDNEY_DECLINE_SHARE = 0.05  # ~5% of hypertensive patients have rapid CKD progression
 EHR_STREAM = 1
 OTHER_ANTIHYPERTENSIVES = (
@@ -56,6 +57,7 @@ class Patient:
     height_m: float
     weight_kg: float
     medications: frozenset[DrugClass]
+    diabetes: bool
     hidden: HiddenPhysiology
     kidney: KidneyRecord
 
@@ -123,6 +125,11 @@ def generate_cohort(n_patients: int, seed: int = 0) -> list[Patient]:
         hidden = _sample_hidden(rng, on_bb)
         if ehr_rng.random() < NSAID_SHARE:
             meds = meds | {DrugClass.NSAID}
+        diabetic = bool(ehr_rng.random() < DIABETES_SHARE)
+        if diabetic:
+            meds = meds | {DrugClass.METFORMIN}
+            if ehr_rng.random() < 0.5:
+                meds = meds | {DrugClass.SULFONYLUREA}
         patients.append(
             Patient(
                 patient_id=f"P{i:04d}",
@@ -131,6 +138,7 @@ def generate_cohort(n_patients: int, seed: int = 0) -> list[Patient]:
                 height_m=height,
                 weight_kg=bmi * height**2,
                 medications=meds,
+                diabetes=diabetic,
                 hidden=hidden,
                 kidney=_sample_kidney(ehr_rng, age),
             )

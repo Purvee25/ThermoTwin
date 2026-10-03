@@ -15,11 +15,13 @@ from thermotwin.api.schemas import (
     Meta,
     PatientSummary,
     ReviewItem,
+    Tier0Response,
     Timeline,
     WhatIfRequest,
     WhatIfResponse,
 )
 from thermotwin.api.service import PatientNotFoundError, TwinService
+from thermotwin.nowearable import tier0_risk
 
 
 class Settings(BaseSettings):
@@ -81,6 +83,34 @@ def timeline(patient_id: str, service: Service) -> Timeline:
         return service.timeline(patient_id)
     except PatientNotFoundError as exc:
         raise HTTPException(status_code=404, detail=f"patient {patient_id} not found") from exc
+
+
+@app.get("/tier0", response_model=Tier0Response)
+def tier0(
+    air_temp_c: Annotated[float, Query(description="Air temperature (°C)")],
+    humidity_pct: Annotated[float, Query(ge=0, le=100, description="Relative humidity (%)")],
+    hour: Annotated[float, Query(ge=0, lt=24, description="Hour of day (0-23.9)")],
+    age: Annotated[int, Query(ge=0, le=120)],
+    bmi: Annotated[float, Query(gt=0)],
+    occupation: Annotated[str, Query(description="Worker occupation")],
+    has_heat_drug: Annotated[bool, Query(description="On heat-illness-associated medication")],
+) -> Tier0Response:
+    result = tier0_risk(
+        air_temp_c=air_temp_c,
+        relative_humidity_pct=humidity_pct,
+        hour=hour,
+        age=age,
+        bmi=bmi,
+        occupation=occupation,
+        has_heat_illness_drug=has_heat_drug,
+    )
+    return Tier0Response(
+        wbgt_c=result.wbgt_c,
+        risk_score=result.risk_score,
+        alert=result.alert,
+        tier=result.tier,
+        reasons=list(result.reasons),
+    )
 
 
 @app.post("/patients/{patient_id}/whatif", response_model=WhatIfResponse)

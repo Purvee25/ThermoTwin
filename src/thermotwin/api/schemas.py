@@ -84,6 +84,14 @@ class Meta(BaseModel):
     disclaimer: str
 
 
+class Tier0Response(BaseModel):
+    wbgt_c: float
+    risk_score: float
+    alert: bool
+    tier: str
+    reasons: list[str]
+
+
 class ReviewFinding(BaseModel):
     code: str
     title: str
