@@ -1,0 +1,5 @@
+tier,n_features,auroc,auprc,brier,warned_30min_ahead_pct
+Baseline (demographic only),3,0.723,0.563,0.258,16.7
++ Weather,5,0.793,0.732,0.197,16.7
++ Twin,13,0.821,0.731,0.204,33.3
++ Personal (full model),14,0.794,0.738,0.186,33.3
