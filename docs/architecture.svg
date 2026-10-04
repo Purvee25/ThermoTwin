@@ -1,0 +1,219 @@
+<svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#d97706"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="#00000022"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="720" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <rect x="0" y="0" width="1000" height="48" fill="#1e293b"/>
+  <text x="500" y="30" text-anchor="middle" fill="white" font-size="16" font-weight="700" letter-spacing="1">ThermoTwin — Medication-Aware Hypertension Digital Twin Architecture</text>
+  <text x="500" y="43" text-anchor="middle" fill="#94a3b8" font-size="10">Heat-triggered crisis prediction for India's outdoor workers</text>
+
+  <!-- ─────────────────────────── LAYER LABELS ─────────────────────────── -->
+
+  <!-- Layer 1: DATA LAYER -->
+  <rect x="14" y="58" width="972" height="118" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="14" y="58" width="8" height="118" rx="4" fill="#3b82f6"/>
+  <text x="30" y="76" fill="#1d4ed8" font-size="10" font-weight="700" letter-spacing="1.5">DATA LAYER</text>
+
+  <!-- PROSPIE dataset box -->
+  <rect x="30" y="84" width="290" height="80" rx="6" fill="white" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="175" y="100" text-anchor="middle" fill="#1d4ed8" font-size="11" font-weight="700">PROSPIE Real Heat Trial Dataset</text>
+  <text x="175" y="116" text-anchor="middle" fill="#374151" font-size="9.5">22 participants · 99 trials</text>
+  <text x="175" y="130" text-anchor="middle" fill="#6b7280" font-size="9">HR, Tc (rectal), WBGT, medication flags</text>
+  <text x="175" y="144" text-anchor="middle" fill="#6b7280" font-size="9">exercise stress · progressive heat exposure</text>
+  <text x="175" y="158" text-anchor="middle" fill="#6b7280" font-size="9">Buller 2013 protocol · ground-truth labels</text>
+
+  <!-- Synthetic EHR box -->
+  <rect x="340" y="84" width="290" height="80" rx="6" fill="white" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="485" y="100" text-anchor="middle" fill="#1d4ed8" font-size="11" font-weight="700">Synthetic EHR Cohort</text>
+  <text x="485" y="116" text-anchor="middle" fill="#374151" font-size="9.5">Demographics · medications · kidney function</text>
+  <text x="485" y="130" text-anchor="middle" fill="#6b7280" font-size="9">diabetes · hypertension stage · age · BMI</text>
+  <text x="485" y="144" text-anchor="middle" fill="#6b7280" font-size="9">Beta-blocker / ACE-inhibitor / diuretic flags</text>
+  <text x="485" y="158" text-anchor="middle" fill="#6b7280" font-size="9">eGFR · comorbidity risk score</text>
+
+  <!-- WBGT/Weather box -->
+  <rect x="650" y="84" width="320" height="80" rx="6" fill="white" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="810" y="100" text-anchor="middle" fill="#1d4ed8" font-size="11" font-weight="700">Environmental Input</text>
+  <text x="810" y="116" text-anchor="middle" fill="#374151" font-size="9.5">Ambient temp · humidity · solar load · wind</text>
+  <text x="810" y="130" text-anchor="middle" fill="#6b7280" font-size="9">WBGT (Wet-Bulb Globe Temperature)</text>
+  <text x="810" y="144" text-anchor="middle" fill="#6b7280" font-size="9">Stull 2011 approximation from T_dry + RH</text>
+  <text x="810" y="158" text-anchor="middle" fill="#6b7280" font-size="9">India outdoor work conditions · shift metadata</text>
+
+  <!-- ─────────────────────────── LAYER 2: TWIN ENGINE ─────────────────────────── -->
+  <rect x="14" y="190" width="972" height="148" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="14" y="190" width="8" height="148" rx="4" fill="#16a34a"/>
+  <text x="30" y="208" fill="#15803d" font-size="10" font-weight="700" letter-spacing="1.5">TWIN ENGINE</text>
+
+  <!-- ECTemp Kalman -->
+  <rect x="30" y="214" width="195" height="110" rx="6" fill="white" stroke="#86efac" stroke-width="1.5"/>
+  <text x="127" y="231" text-anchor="middle" fill="#15803d" font-size="10.5" font-weight="700">ECTemp Kalman Filter</text>
+  <text x="127" y="246" text-anchor="middle" fill="#374151" font-size="9">Buller 2013 model</text>
+  <text x="127" y="260" text-anchor="middle" fill="#6b7280" font-size="8.5">Estimates core body temperature</text>
+  <text x="127" y="274" text-anchor="middle" fill="#6b7280" font-size="8.5">from HR wearable signal</text>
+  <text x="127" y="288" text-anchor="middle" fill="#6b7280" font-size="8.5">State: [Tc_est, HR_est]</text>
+  <text x="127" y="302" text-anchor="middle" fill="#6b7280" font-size="8.5">Observation: HR (wearable)</text>
+  <text x="127" y="316" text-anchor="middle" fill="#6b7280" font-size="8.5">Input: WBGT, work intensity</text>
+
+  <!-- Beta-blocker correction -->
+  <rect x="243" y="214" width="195" height="110" rx="6" fill="white" stroke="#86efac" stroke-width="1.5"/>
+  <text x="340" y="231" text-anchor="middle" fill="#15803d" font-size="10.5" font-weight="700">Beta-Blocker Correction</text>
+  <text x="340" y="246" text-anchor="middle" fill="#374151" font-size="9">Medication-aware HR adjustment</text>
+  <text x="340" y="260" text-anchor="middle" fill="#6b7280" font-size="8.5">unblunt_heart_rate()</text>
+  <text x="340" y="274" text-anchor="middle" fill="#6b7280" font-size="8.5">hr_rise_retained = 0.70</text>
+  <text x="340" y="288" text-anchor="middle" fill="#6b7280" font-size="8.5">Recovers masked tachycardia</text>
+  <text x="340" y="302" text-anchor="middle" fill="#6b7280" font-size="8.5">in medicated workers</text>
+  <text x="340" y="316" text-anchor="middle" fill="#6b7280" font-size="8.5">EHR med flags → scale factor</text>
+
+  <!-- Gagge two-node -->
+  <rect x="456" y="214" width="195" height="110" rx="6" fill="white" stroke="#86efac" stroke-width="1.5"/>
+  <text x="553" y="231" text-anchor="middle" fill="#15803d" font-size="10.5" font-weight="700">Gagge Two-Node Model</text>
+  <text x="553" y="246" text-anchor="middle" fill="#374151" font-size="9">Biophysics thermoregulation</text>
+  <text x="553" y="260" text-anchor="middle" fill="#6b7280" font-size="8.5">Core node + skin node</text>
+  <text x="553" y="274" text-anchor="middle" fill="#6b7280" font-size="8.5">Heat production vs. dissipation</text>
+  <text x="553" y="288" text-anchor="middle" fill="#6b7280" font-size="8.5">Sweat rate · skin blood flow</text>
+  <text x="553" y="302" text-anchor="middle" fill="#6b7280" font-size="8.5">Predicts Tc trajectory</text>
+  <text x="553" y="316" text-anchor="middle" fill="#6b7280" font-size="8.5">Physics-based forward model</text>
+
+  <!-- PersonalBias learner -->
+  <rect x="669" y="214" width="300" height="110" rx="6" fill="white" stroke="#86efac" stroke-width="1.5"/>
+  <text x="819" y="231" text-anchor="middle" fill="#15803d" font-size="10.5" font-weight="700">PersonalBias Learner</text>
+  <text x="819" y="246" text-anchor="middle" fill="#374151" font-size="9">Per-worker adaptive offset</text>
+  <text x="819" y="260" text-anchor="middle" fill="#6b7280" font-size="8.5">Learns residual Tc offset from prior shifts</text>
+  <text x="819" y="274" text-anchor="middle" fill="#6b7280" font-size="8.5">Accounts for individual physiology variance</text>
+  <text x="819" y="288" text-anchor="middle" fill="#6b7280" font-size="8.5">Corrects systematic model bias per person</text>
+  <text x="819" y="302" text-anchor="middle" fill="#6b7280" font-size="8.5">Shift history → rolling mean bias</text>
+  <text x="819" y="316" text-anchor="middle" fill="#6b7280" font-size="8.5">Updates after each completed shift</text>
+
+  <!-- ─────────────────────────── LAYER 3: ML FORECASTER + TIER 0 ─────────────────────────── -->
+  <rect x="14" y="352" width="460" height="118" rx="8" fill="#fdf4ff" stroke="#e9d5ff" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="14" y="352" width="8" height="118" rx="4" fill="#9333ea"/>
+  <text x="30" y="370" fill="#7e22ce" font-size="10" font-weight="700" letter-spacing="1.5">ML FORECASTER</text>
+
+  <rect x="30" y="378" width="425" height="80" rx="6" fill="white" stroke="#d8b4fe" stroke-width="1.5"/>
+  <text x="242" y="396" text-anchor="middle" fill="#7e22ce" font-size="11" font-weight="700">HistGradientBoostingClassifier</text>
+  <text x="242" y="412" text-anchor="middle" fill="#374151" font-size="9.5">60-minute danger prediction</text>
+  <text x="242" y="428" text-anchor="middle" fill="#6b7280" font-size="9">Features: Tc_est, HR_corrected, WBGT, work_intensity, med_flags, bias_offset</text>
+  <text x="242" y="442" text-anchor="middle" fill="#6b7280" font-size="9">Output: P(heat crisis in next 60 min) · AUROC from personal learning</text>
+  <text x="242" y="456" text-anchor="middle" fill="#6b7280" font-size="9">Handles missing values natively · calibrated probabilities · SHAP explainability</text>
+
+  <!-- TIER 0 FALLBACK -->
+  <rect x="488" y="352" width="498" height="118" rx="8" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="488" y="352" width="8" height="118" rx="4" fill="#ea580c"/>
+  <text x="504" y="370" fill="#c2410c" font-size="10" font-weight="700" letter-spacing="1.5">TIER 0 FALLBACK — No Wearable</text>
+
+  <rect x="504" y="378" width="465" height="80" rx="6" fill="white" stroke="#fdba74" stroke-width="1.5"/>
+  <text x="736" y="396" text-anchor="middle" fill="#c2410c" font-size="11" font-weight="700">WBGT-Based Risk Score</text>
+  <text x="736" y="412" text-anchor="middle" fill="#374151" font-size="9.5">No wearable required · pure environmental + EHR path</text>
+  <text x="736" y="428" text-anchor="middle" fill="#6b7280" font-size="9">WBGT approx (Stull 2011) + demographics + medication burden score</text>
+  <text x="736" y="442" text-anchor="middle" fill="#6b7280" font-size="9">Risk tiers: LOW / MODERATE / HIGH / CRITICAL · actionable thresholds</text>
+  <text x="736" y="456" text-anchor="middle" fill="#6b7280" font-size="9">Fallback when HR sensor unavailable · works at population scale</text>
+
+  <!-- ─────────────────────────── LAYER 4: API LAYER ─────────────────────────── -->
+  <rect x="14" y="484" width="972" height="100" rx="8" fill="#fefce8" stroke="#fde68a" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="14" y="484" width="8" height="100" rx="4" fill="#ca8a04"/>
+  <text x="30" y="502" fill="#a16207" font-size="10" font-weight="700" letter-spacing="1.5">API LAYER — FastAPI</text>
+
+  <!-- Endpoint boxes -->
+  <rect x="32" y="510" width="130" height="62" rx="5" fill="white" stroke="#fcd34d" stroke-width="1.5"/>
+  <text x="97" y="527" text-anchor="middle" fill="#a16207" font-size="10" font-weight="700">/patients</text>
+  <text x="97" y="541" text-anchor="middle" fill="#6b7280" font-size="8.5">CRUD · EHR data</text>
+  <text x="97" y="554" text-anchor="middle" fill="#6b7280" font-size="8.5">medication registry</text>
+
+  <rect x="178" y="510" width="130" height="62" rx="5" fill="white" stroke="#fcd34d" stroke-width="1.5"/>
+  <text x="243" y="527" text-anchor="middle" fill="#a16207" font-size="10" font-weight="700">/timeline</text>
+  <text x="243" y="541" text-anchor="middle" fill="#6b7280" font-size="8.5">Tc_est history</text>
+  <text x="243" y="554" text-anchor="middle" fill="#6b7280" font-size="8.5">alert events per shift</text>
+
+  <rect x="324" y="510" width="130" height="62" rx="5" fill="white" stroke="#fcd34d" stroke-width="1.5"/>
+  <text x="389" y="527" text-anchor="middle" fill="#a16207" font-size="10" font-weight="700">/whatif</text>
+  <text x="389" y="541" text-anchor="middle" fill="#6b7280" font-size="8.5">Scenario replay</text>
+  <text x="389" y="554" text-anchor="middle" fill="#6b7280" font-size="8.5">drug swap simulation</text>
+
+  <rect x="470" y="510" width="130" height="62" rx="5" fill="white" stroke="#fcd34d" stroke-width="1.5"/>
+  <text x="535" y="527" text-anchor="middle" fill="#a16207" font-size="10" font-weight="700">/review</text>
+  <text x="535" y="541" text-anchor="middle" fill="#6b7280" font-size="8.5">Pre-summer med</text>
+  <text x="535" y="554" text-anchor="middle" fill="#6b7280" font-size="8.5">review workflow</text>
+
+  <rect x="616" y="510" width="130" height="62" rx="5" fill="white" stroke="#fcd34d" stroke-width="1.5"/>
+  <text x="681" y="527" text-anchor="middle" fill="#a16207" font-size="10" font-weight="700">/tier0</text>
+  <text x="681" y="541" text-anchor="middle" fill="#6b7280" font-size="8.5">No-wearable</text>
+  <text x="681" y="554" text-anchor="middle" fill="#6b7280" font-size="8.5">risk endpoint</text>
+
+  <rect x="762" y="510" width="210" height="62" rx="5" fill="white" stroke="#fcd34d" stroke-width="1.5"/>
+  <text x="867" y="527" text-anchor="middle" fill="#a16207" font-size="10" font-weight="700">/explain</text>
+  <text x="867" y="541" text-anchor="middle" fill="#6b7280" font-size="8.5">SHAP feature importance</text>
+  <text x="867" y="554" text-anchor="middle" fill="#6b7280" font-size="8.5">natural language alert rationale</text>
+
+  <!-- ─────────────────────────── LAYER 5: DASHBOARD ─────────────────────────── -->
+  <rect x="14" y="598" width="972" height="106" rx="8" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="14" y="598" width="8" height="106" rx="4" fill="#0284c7"/>
+  <text x="30" y="616" fill="#0369a1" font-size="10" font-weight="700" letter-spacing="1.5">DASHBOARD — React 19 + Vite + TypeScript</text>
+
+  <rect x="30" y="622" width="280" height="70" rx="6" fill="white" stroke="#7dd3fc" stroke-width="1.5"/>
+  <text x="170" y="640" text-anchor="middle" fill="#0369a1" font-size="10.5" font-weight="700">Cardiologist / Supervisor UI</text>
+  <text x="170" y="655" text-anchor="middle" fill="#6b7280" font-size="9">Replay slider · real-time Tc timeline</text>
+  <text x="170" y="669" text-anchor="middle" fill="#6b7280" font-size="9">Alert history · risk gauge</text>
+  <text x="170" y="683" text-anchor="middle" fill="#6b7280" font-size="9">Worker dashboard · cohort overview</text>
+
+  <rect x="326" y="622" width="280" height="70" rx="6" fill="white" stroke="#7dd3fc" stroke-width="1.5"/>
+  <text x="466" y="640" text-anchor="middle" fill="#0369a1" font-size="10.5" font-weight="700">What-If Panel</text>
+  <text x="466" y="655" text-anchor="middle" fill="#6b7280" font-size="9">Medication swap simulator</text>
+  <text x="466" y="669" text-anchor="middle" fill="#6b7280" font-size="9">Shift condition adjustment</text>
+  <text x="466" y="683" text-anchor="middle" fill="#6b7280" font-size="9">Live risk re-forecast on parameter change</text>
+
+  <rect x="622" y="622" width="350" height="70" rx="6" fill="white" stroke="#7dd3fc" stroke-width="1.5"/>
+  <text x="797" y="640" text-anchor="middle" fill="#0369a1" font-size="10.5" font-weight="700">Pre-Summer Medication Review</text>
+  <text x="797" y="655" text-anchor="middle" fill="#6b7280" font-size="9">High-risk patient list · SHAP explanations</text>
+  <text x="797" y="669" text-anchor="middle" fill="#6b7280" font-size="9">Recommended drug alternatives for heat season</text>
+  <text x="797" y="683" text-anchor="middle" fill="#6b7280" font-size="9">Cardiologist sign-off workflow · audit trail</text>
+
+  <!-- ─────────────────────────── DATA FLOW ARROWS ─────────────────────────── -->
+
+  <!-- Data layer → Twin engine (left column) -->
+  <line x1="175" y1="164" x2="127" y2="214" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="5,3"/>
+  <!-- Data layer → Twin engine (beta-blocker) -->
+  <line x1="485" y1="164" x2="340" y2="214" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="5,3"/>
+  <!-- Env input → Kalman -->
+  <line x1="810" y1="164" x2="553" y2="214" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="5,3"/>
+
+  <!-- Twin engine internal flow arrows -->
+  <line x1="225" y1="269" x2="243" y2="269" stroke="#16a34a" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="438" y1="269" x2="456" y2="269" stroke="#16a34a" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="651" y1="269" x2="669" y2="269" stroke="#16a34a" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Twin engine → ML Forecaster -->
+  <line x1="200" y1="324" x2="200" y2="378" stroke="#16a34a" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="340" y1="324" x2="242" y2="378" stroke="#16a34a" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="553" y1="324" x2="242" y2="378" stroke="#16a34a" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Env data → Tier 0 -->
+  <line x1="810" y1="164" x2="736" y2="378" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arrow-orange)" stroke-dasharray="4,4"/>
+  <!-- EHR → Tier 0 -->
+  <line x1="485" y1="164" x2="736" y2="378" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arrow-orange)" stroke-dasharray="4,4"/>
+
+  <!-- ML Forecaster → API -->
+  <line x1="242" y1="458" x2="389" y2="510" stroke="#9333ea" stroke-width="2" marker-end="url(#arrow)"/>
+  <!-- Tier 0 → API /tier0 -->
+  <line x1="736" y1="458" x2="681" y2="510" stroke="#ea580c" stroke-width="2" marker-end="url(#arrow-orange)"/>
+
+  <!-- API → Dashboard -->
+  <line x1="500" y1="584" x2="500" y2="598" stroke="#ca8a04" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Legend -->
+  <rect x="14" y="706" width="972" height="12" rx="0" fill="#e2e8f0"/>
+  <text x="30" y="715" fill="#64748b" font-size="8.5">● Blue dashed = raw data ingestion  ● Green solid = physics/ML pipeline  ● Orange = no-wearable fallback path  ● Yellow = API serving  ● Blue = frontend consumption</text>
+</svg>

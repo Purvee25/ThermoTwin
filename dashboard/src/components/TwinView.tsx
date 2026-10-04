@@ -80,28 +80,24 @@ export function TwinView({ patient, minute, dangerCoreC }: Props) {
           </p>
         </div>
         <div className="stats">
-          <Stat label={`Twin core · ${now.clock}`} value={`${now.twin_core_c.toFixed(2)} °C`} danger={now.twin_core_c >= dangerCoreC} />
+          <Stat label={`Core · ${now.clock}`} value={`${now.twin_core_c.toFixed(2)} °C`} danger={now.twin_core_c >= dangerCoreC} />
           <Stat
-            label="Chance ≥38 °C now"
+            label="Danger now"
             value={`${Math.round(now.p_above_now * 100)}%`}
             danger={now.p_above_now * 100 >= ALERT_PERCENT}
           />
           <Stat
-            label="Forecast ≥38 °C in 60 min"
+            label="Risk in 60 min"
             value={riskNow === null ? '—' : `${Math.round(riskNow)}%`}
             danger={riskNow !== null && riskNow >= ALERT_PERCENT}
           />
-          <Stat label="Heart rate" value={`${Math.round(now.heart_rate)} bpm`} />
-          <Stat label="Air temp" value={`${now.air_temp_c.toFixed(1)} °C`} />
+          <Stat label="HR" value={`${Math.round(now.heart_rate)} bpm`} />
+          <Stat label="Air" value={`${now.air_temp_c.toFixed(1)} °C`} />
         </div>
       </div>
 
       <div className="chart-card">
-        <h3>Estimated core temperature</h3>
-        <p className="hint">
-          Medication-aware twin estimate. Shaded: 80% interval from error measured on real heat trials. Dashed red line: {dangerCoreC} °C danger threshold.
-          {scenario && ' Green: with the simulated rest break.'}
-        </p>
+        <h3>Core temperature{scenario && <span className="hint-inline"> · green = with rest break</span>}</h3>
         <ResponsiveContainer width="100%" height={260}>
           <ComposedChart data={rows} margin={{ top: 8, right: 12, bottom: 0, left: -12 }}>
             <CartesianGrid stroke="var(--border)" vertical={false} />
@@ -131,8 +127,7 @@ export function TwinView({ patient, minute, dangerCoreC }: Props) {
       </div>
 
       <div className="chart-card">
-        <h3>60-minute heat-crisis risk</h3>
-        <p className="hint">Alert when the chance of reaching {dangerCoreC} °C within the next hour is ≥ {ALERT_PERCENT}%.</p>
+        <h3>60-min risk forecast</h3>
         <ResponsiveContainer width="100%" height={150}>
           <ComposedChart data={rows} margin={{ top: 8, right: 12, bottom: 0, left: -12 }}>
             <CartesianGrid stroke="var(--border)" vertical={false} />

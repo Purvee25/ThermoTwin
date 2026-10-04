@@ -329,6 +329,13 @@ select {
   font-size: 0.85rem;
 }
 
+.hint-inline {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+  margin-left: 6px;
+}
+
 .toggle {
   display: inline-flex;
   gap: 6px;
