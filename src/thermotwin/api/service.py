@@ -8,10 +8,12 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+import shap
 from scipy.stats import norm
 
 from thermotwin import paths
 from thermotwin.api.schemas import (
+    ExplainResponse,
     MedicationFlag,
     Meta,
     PatientSummary,
@@ -19,6 +21,7 @@ from thermotwin.api.schemas import (
     ReviewItem,
     RiskStatus,
     ScenarioSummary,
+    ShapContribution,
     Timeline,
     TimelinePoint,
 )
@@ -28,6 +31,7 @@ from thermotwin.forecast import (
     DANGER_CORE_C,
     MODEL_PATH,
     WARMUP_MIN,
+    explain_prediction,
     features_from_shift,
     learn_bias,
 )
@@ -257,6 +261,51 @@ class TwinService:
         ]
         return Timeline(
             patient_id=patient_id, date=self.day.date, danger_core_c=DANGER_CORE_C, points=points
+        )
+
+    def explain(self, patient_id: str, minute: int | None = None) -> ExplainResponse:
+        """Return top-5 SHAP feature contributions for the patient's current risk minute.
+
+        If ``minute`` is None, uses the last row with a valid risk_60 score.
+        """
+        demo = self._get(patient_id)
+        df = demo.timeline
+        ready = df[df["risk_60"].notna()]
+        if ready.empty:
+            raise PatientNotFoundError(f"{patient_id} has no valid forecast minute yet")
+
+        if minute is not None:
+            row_df = ready[ready["minute"] == minute]
+            if row_df.empty:
+                # fall back to closest ready minute
+                idx = (ready["minute"] - minute).abs().idxmin()
+                row_df = ready.loc[[idx]]
+        else:
+            row_df = ready.iloc[[-1]]  # last ready row
+
+        contributions = explain_prediction(self._model, row_df, self._features)
+        total_abs = sum(abs(c["contribution"]) for c in contributions) or 1.0
+        explainer = shap.TreeExplainer(self._model)
+        ev = explainer.expected_value
+        # For binary classifiers SHAP may return a 1-element array; extract scalar.
+        base_value = float(ev[-1] if hasattr(ev, "__len__") else ev)
+
+        top5 = [
+            ShapContribution(
+                feature=c["feature"],
+                value=round(c["value"], 4),
+                contribution=round(c["contribution"], 4),
+                contribution_pct=round(100 * abs(c["contribution"]) / total_abs, 1),
+            )
+            for c in contributions[:5]
+        ]
+        risk_val = float(row_df["risk_60"].iloc[0])
+        return ExplainResponse(
+            patient_id=patient_id,
+            minute=int(row_df["minute"].iloc[0]),
+            risk_60=round(risk_val, 3),
+            base_value=round(base_value, 4),
+            top_features=top5,
         )
 
     def what_if(

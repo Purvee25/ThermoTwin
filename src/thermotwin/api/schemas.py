@@ -92,6 +92,21 @@ class Tier0Response(BaseModel):
     reasons: list[str]
 
 
+class ShapContribution(BaseModel):
+    feature: str = Field(description="Feature name")
+    value: float = Field(description="Current raw feature value")
+    contribution: float = Field(description="SHAP value (positive = increases risk probability)")
+    contribution_pct: float = Field(description="Contribution as % of total absolute SHAP mass")
+
+
+class ExplainResponse(BaseModel):
+    patient_id: str
+    minute: int
+    risk_60: float = Field(description="ML forecast probability at this minute")
+    base_value: float = Field(description="SHAP base value (mean model output)")
+    top_features: list[ShapContribution] = Field(description="Top 5 features by |contribution|")
+
+
 class ReviewFinding(BaseModel):
     code: str
     title: str

@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from thermotwin.api.schemas import (
+    ExplainResponse,
     Meta,
     PatientSummary,
     ReviewItem,
@@ -111,6 +112,19 @@ def tier0(
         tier=result.tier,
         reasons=list(result.reasons),
     )
+
+
+@app.get("/patients/{patient_id}/explain", response_model=ExplainResponse)
+def explain(
+    patient_id: str,
+    service: Service,
+    minute: Annotated[int | None, Query(ge=0, description="Shift minute to explain")] = None,
+) -> ExplainResponse:
+    """Return top-5 SHAP feature contributions explaining why this patient is at risk."""
+    try:
+        return service.explain(patient_id, minute)
+    except PatientNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=f"patient {patient_id} not found") from exc
 
 
 @app.post("/patients/{patient_id}/whatif", response_model=WhatIfResponse)

@@ -15,6 +15,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+import shap
 from pythermalcomfort.models import two_nodes_gagge
 from scipy.stats import norm
 from sklearn.ensemble import HistGradientBoostingClassifier
@@ -241,6 +242,39 @@ def run(n_patients: int, seed: int, learn_personal: bool = False) -> dict[str, d
         "test_positive_rate": round(float(test["label"].mean()), 3),
     }
     return report
+
+
+def explain_prediction(
+    model: HistGradientBoostingClassifier,
+    features_df: pd.DataFrame,
+    feature_names: list[str],
+) -> list[dict[str, float]]:
+    """Compute SHAP feature contributions for a single prediction row.
+
+    Args:
+        model: Trained HistGradientBoostingClassifier.
+        features_df: DataFrame with exactly one row of features.
+        feature_names: Ordered list of feature column names matching the model.
+
+    Returns:
+        List of dicts sorted by |contribution| descending, each with keys
+        ``feature``, ``value`` (raw feature value), and ``contribution``
+        (SHAP value in probability space for the positive class).
+    """
+    explainer = shap.TreeExplainer(model)
+    row = features_df[feature_names]
+    shap_values = explainer.shap_values(row)
+    # HistGradientBoostingClassifier: TreeExplainer returns (n_rows, n_features)
+    # for the positive class directly (single-output internal tree).
+    contributions = np.asarray(shap_values).flatten()
+    return sorted(
+        [
+            {"feature": name, "value": float(row.iloc[0][name]), "contribution": float(c)}
+            for name, c in zip(feature_names, contributions, strict=True)
+        ],
+        key=lambda x: abs(x["contribution"]),
+        reverse=True,
+    )
 
 
 def new_forecaster(seed: int) -> HistGradientBoostingClassifier:
