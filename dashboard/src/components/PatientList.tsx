@@ -1,21 +1,41 @@
-import type { PatientSummary } from '../api'
-import { drugLabel } from '../drugs'
+import type { PatientSummary } from "../api";
+import { drugLabel } from "../drugs";
 
 function riskText(patient: PatientSummary): string {
   const risk =
     patient.risk_now === null
       ? patient.peak_risk
-      : Math.max(patient.risk_now, patient.p_above_now ?? 0)
-  return `${Math.round(risk * 100)}%`
+      : Math.max(patient.risk_now, patient.p_above_now ?? 0);
+  return `${Math.round(risk * 100)}%`;
 }
 
 interface Props {
-  patients: PatientSummary[]
-  activeId: string | null
-  onSelect: (id: string) => void
+  patients: PatientSummary[];
+  activeId: string | null;
+  onSelect: (id: string) => void;
+  loading?: boolean;
 }
 
-export function PatientList({ patients, activeId, onSelect }: Props) {
+export function PatientList({ patients, activeId, onSelect, loading }: Props) {
+  if (loading) {
+    return (
+      <ul className="patient-list">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <li key={i} className="patient-skeleton">
+            <span className="skel-dot" />
+            <span className="skel-line skel-name" />
+            <span className="skel-pill" />
+            <span className="skel-line skel-sub" />
+            <span className="skel-chips">
+              <span className="skel-chip" />
+              <span className="skel-chip" />
+            </span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   return (
     <ul className="patient-list">
       {patients.map((p) => (
@@ -26,19 +46,37 @@ export function PatientList({ patients, activeId, onSelect }: Props) {
             aria-current={p.patient_id === activeId}
             onClick={() => onSelect(p.patient_id)}
           >
-            <span className={`dot ${p.status}`} aria-label={`${p.status} risk`} />
-            <span className="patient-name">{p.name}</span>
-            <span className={`risk-pill ${p.status}`} title="Higher of: chance core is ≥ 38 °C now, and forecast chance within 60 min">
+            <span
+              className={`dot ${p.status}`}
+              aria-label={`${p.status} risk`}
+            />
+            <span className="patient-name">
+              {p.status === "red" && (
+                <span className="alert-icon" aria-hidden>
+                  ⚠{" "}
+                </span>
+              )}
+              {p.name}
+            </span>
+            <span
+              className={`risk-pill ${p.status}`}
+              title="Higher of: chance core is ≥ 38 °C now, and forecast chance within 60 min"
+            >
               {riskText(p)}
             </span>
             <span className="patient-sub">
               {p.age}
-              {p.sex === 'female' ? 'F' : 'M'} · {p.occupation}
-              {p.first_alert_clock ? ` · first alert ${p.first_alert_clock}` : ''}
+              {p.sex === "female" ? "F" : "M"} · {p.occupation}
+              {p.first_alert_clock
+                ? ` · first alert ${p.first_alert_clock}`
+                : ""}
             </span>
             <span className="chips">
               {p.medications.map((m) => (
-                <span key={m} className={`chip${m === 'beta_blocker' ? ' bb' : ''}`}>
+                <span
+                  key={m}
+                  className={`chip${m === "beta_blocker" ? " bb" : ""}`}
+                >
                   {drugLabel(m)}
                 </span>
               ))}
@@ -47,5 +85,5 @@ export function PatientList({ patients, activeId, onSelect }: Props) {
         </li>
       ))}
     </ul>
-  )
+  );
 }
