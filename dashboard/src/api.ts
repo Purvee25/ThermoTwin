@@ -88,6 +88,22 @@ export const ReviewItem = z.object({
 })
 export type ReviewItem = z.infer<typeof ReviewItem>
 
+const ShapContribution = z.object({
+  feature: z.string(),
+  value: z.number(),
+  contribution: z.number(),
+  contribution_pct: z.number(),
+})
+
+export const ExplainResponse = z.object({
+  patient_id: z.string(),
+  minute: z.number(),
+  risk_60: z.number().nullable(),
+  base_value: z.number(),
+  top_features: z.array(ShapContribution),
+})
+export type ExplainResponse = z.infer<typeof ExplainResponse>
+
 async function request<T>(schema: z.ZodType<T>, path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, init)
   if (!response.ok) throw new Error(`${response.status} ${response.statusText} for ${path}`)
@@ -105,4 +121,6 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ start_minute: startMinute, duration_min: durationMin }),
     }),
+  explain: (id: string, minute: number) =>
+    request(ExplainResponse, `/patients/${encodeURIComponent(id)}/explain?minute=${minute}`),
 }
