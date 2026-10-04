@@ -1,10 +1,31 @@
 # ThermoTwin
 
+![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python) ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi) ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker) ![License MIT](https://img.shields.io/badge/License-MIT-green) ![Tests 46 passing](https://img.shields.io/badge/Tests-46%20passing-brightgreen)
+
 **A medication-aware hypertension digital twin that predicts when India's heat will tip a patient into crisis.**
 
 Built for the Happiest Health *Digital Twin Challenge 2026*.
 
 > Research prototype on synthetic data. Not a medical device.
+
+## Submission
+
+| Field | Details |
+|---|---|
+| **Challenge** | Happiest Health Digital Twin Challenge 2026 |
+| **Team name** | ThermoTwin Team *(placeholder — fill exact name before submission)* |
+| **College / Incubator** | SRMIST — SRM Institute of Science and Technology, Kattankulathur, Tamil Nadu |
+| **Student** | Purvee Singh |
+| **Submission folder** | `ThermoTwin_SRMIST` |
+| **Project title** | ThermoTwin: Medication-Aware Heat-Strain Digital Twin for Hypertensive Outdoor Workers |
+| **Problem statement** | 315 million hypertensive Indians work outdoors; their BP medicines (beta-blockers, diuretics, RAAS drugs) alter how heat affects them, but generic heat alerts ignore this, missing 82% of dangerous moments for beta-blocker users. |
+| **Healthcare use case** | Early-warning system for occupational heat illness in hypertensive outdoor workers; pre-summer medication review for clinicians. |
+| **AI / ML model** | ECTemp extended Kalman filter + `HistGradientBoostingClassifier` (scikit-learn) 60-minute danger forecaster; per-person bias learning from shift thermometer readings. |
+| **Technical stack** | Python 3.11 · FastAPI · React 19 · Docker Compose · scikit-learn · pythermalcomfort (JOS-3) · Open-Meteo · Recharts · TanStack Query · zod |
+| **Video demo** | 🎬 Video demo: [To be added — recording in progress] |
+| **Architecture diagram** | [`docs/ThermoTwin_architecture.pdf`](docs/ThermoTwin_architecture.pdf) |
+| **Presentation** | [`docs/ThermoTwin_presentation.pdf`](docs/ThermoTwin_presentation.pdf) |
+| **Open-source license** | MIT — see [`LICENSE`](LICENSE) |
 
 ## Submission at a glance
 
@@ -241,13 +262,32 @@ At the ALERT_PROBABILITY=0.50 threshold: beta-blocker patients — HR-only model
 - [x] FastAPI service and React clinician dashboard with a what-if simulator
 - [x] Docker Compose (API + dashboard)
 - [x] Architecture diagram and presentation (`docs/`)
-- [ ] Demo video
+- [ ] Demo video — 🎬 [To be added — recording in progress]
+
+## Results vs Competitors
+
+| Approach | Danger minutes caught (beta-blocker patient) | False-alarm rate | No-wearable support | Medication-aware |
+|---|---|---|---|---|
+| Generic WBGT city alert | ~0% (threshold too coarse) | Very high | Yes | No |
+| HR-only ECTemp | 18% | 0% | No | No |
+| **ThermoTwin** | **62%** | **8%** | **Yes (Tier 0)** | **Yes** |
+| Oracle (knows true core) | 100% | 0% | — | — |
+
+ThermoTwin's key technical advantages over typical heat-alert systems:
+- Medication-aware physiology model corrects beta-blocker HR blunting (population priors, configurable per drug class)
+- Two-tier design: wearable Tier 1 (ECTemp Kalman filter) + no-wearable Tier 0 (WBGT + demographics + medication flag)
+- 60-minute probabilistic danger forecast (AUROC 0.80 with per-person learning) vs binary weather threshold
+- Per-person bias learning from earlier shift thermometer readings — adapts without retraining
+- Evidence-referenced pre-summer medication review (triple-whammy AKI, eGFR, RAAS heat-illness risk)
+- Validated on real heat-trial data (PROSPIE, 22 participants, 99 trials, CC BY-NC 4.0)
 
 ## Submission details
 
-- **Team:** _TBD_
-- **College / incubator:** _TBD_
-- **Video:** _TBD_
+- **Team:** ThermoTwin Team *(placeholder — fill exact name before submission)*
+- **College / incubator:** SRMIST — SRM Institute of Science and Technology, Kattankulathur, Tamil Nadu
+- **Student:** Purvee Singh
+- **Submission folder:** `ThermoTwin_SRMIST`
+- **Video:** 🎬 [To be added — recording in progress]
 - **Architecture diagram:** [`docs/ThermoTwin_architecture.pdf`](docs/ThermoTwin_architecture.pdf) (editable `.pptx` alongside)
 - **Presentation:** [`docs/ThermoTwin_presentation.pdf`](docs/ThermoTwin_presentation.pdf) (editable `.pptx` with speaker notes)
 - **License:** MIT (see `LICENSE`)
