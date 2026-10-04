@@ -74,10 +74,14 @@ def learn_bias(
 
 
 def features_from_shift(
-    patient: Patient, day: DayWeather, shift: pd.DataFrame, bias: PersonalBias | None = None
+    patient: Patient,
+    day: DayWeather,
+    shift: pd.DataFrame,
+    bias: PersonalBias | None = None,
 ) -> pd.DataFrame:
     """Per-minute twin features for an already simulated shift (label NaN near shift end)."""
     est, var = twin_core_temperature(shift["heart_rate"].to_numpy(), patient.medications)
+    learned_bias_c = float(bias.bias_c) if bias is not None else 0.0
     if bias is not None:
         est = bias.correct(est)
     core = shift["core_temp_c"]
@@ -103,6 +107,7 @@ def features_from_shift(
             "beta_blocker": int(patient.on_beta_blocker),
             "age": patient.age,
             "bmi": patient.weight_kg / patient.height_m**2,
+            "learned_bias_c": learned_bias_c,
             "label": (future_max >= DANGER_CORE_C).astype(float).where(future_max.notna()),
         }
     )
@@ -241,6 +246,83 @@ def run(n_patients: int, seed: int, learn_personal: bool = False) -> dict[str, d
         "test_positive_rate": round(float(test["label"].mean()), 3),
     }
     return report
+
+
+ABLATION_SUBSETS: dict[str, list[str]] = {
+    "Baseline (demographic only)": ["age", "bmi", "beta_blocker"],
+    "+ Weather": ["age", "bmi", "beta_blocker", "air_temp_c", "wbgt_approx"],
+    "+ Twin": [
+        "age", "bmi", "beta_blocker",
+        "air_temp_c", "wbgt_approx",
+        "twin_core_c", "twin_core_sd", "twin_core_slope",
+        "heart_rate", "hr_slope",
+        "physics_rise_60", "physics_projection_c",
+        "minutes_into_shift",
+    ],
+    "+ Personal (full model)": [
+        "age", "bmi", "beta_blocker",
+        "air_temp_c", "wbgt_approx",
+        "twin_core_c", "twin_core_sd", "twin_core_slope",
+        "heart_rate", "hr_slope",
+        "physics_rise_60", "physics_projection_c",
+        "minutes_into_shift",
+        "learned_bias_c",
+    ],
+}
+
+ABLATION_REPORT_PATH = paths.REPORTS_DIR / "forecast_ablation.csv"
+
+
+def run_forecast_ablation(n_patients: int = 100, seed: int = 42) -> pd.DataFrame:
+    """Ablation: train with progressive feature subsets and report AUROC/AUPRC/Brier.
+
+    Adds ``wbgt_approx`` and ``learned_bias_c`` columns to the dataset (not in the
+    standard FEATURES list), then evaluates four nested feature subsets so the jury can
+    see exactly what each data stream contributes.
+
+    Args:
+        n_patients: Number of simulated patients (split 70/30 train/test by patient).
+        seed: RNG seed for reproducibility.
+
+    Returns:
+        DataFrame with one row per ablation tier (saved to reports/forecast_ablation.csv).
+    """
+    data = build_dataset(n_patients, seed, learn_personal=True)
+    # wbgt_approx: simple wet-bulb approximation (Stull 2011) for weather-only tier
+    data["wbgt_approx"] = (
+        data["air_temp_c"] * np.arctan(0.151977 * (data["rh"] + 8.313659) ** 0.5)
+        + np.arctan(data["air_temp_c"] + data["rh"])
+        - np.arctan(data["rh"] - 1.676331)
+        + 0.00391838 * data["rh"] ** 1.5 * np.arctan(0.023101 * data["rh"])
+        - 4.686035
+    )
+    train, test = split_by_patient(data, seed)
+
+    rows = []
+    for tier_name, cols in ABLATION_SUBSETS.items():
+        # Use only columns that actually exist in the dataset
+        avail = [c for c in cols if c in data.columns]
+        clf = new_forecaster(seed)
+        clf.fit(train[avail], train["label"])
+        prob = clf.predict_proba(test[avail])[:, 1]
+        metrics = evaluate(test, prob)
+        rows.append(
+            {
+                "tier": tier_name,
+                "n_features": len(avail),
+                "auroc": metrics["auroc"],
+                "auprc": metrics["auprc"],
+                "brier": metrics["brier"],
+                f"warned_{MIN_LEAD_MIN}min_ahead_pct": metrics[
+                    f"warned_{MIN_LEAD_MIN}min_ahead_pct"
+                ],
+            }
+        )
+
+    result = pd.DataFrame(rows)
+    ABLATION_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    result.to_csv(ABLATION_REPORT_PATH, index=False)
+    return result
 
 
 def new_forecaster(seed: int) -> HistGradientBoostingClassifier:
