@@ -36,9 +36,33 @@ Built for the Happiest Health *Digital Twin Challenge 2026*.
 | **Twin input** | Wearable heart rate + EHR medication list + real heatwave weather |
 | **Key novelty** | Medication-aware ECTemp filter (Tier 1, wearable) + WBGT/demographics fallback (Tier 0, no wearable); beta-blocker HR correction; pre-summer medication review |
 | **Real-data result** | 62% of danger minutes caught vs 18% for HR-only — validated on 22 participants, 99 real heat trials (PROSPIE) |
+| **Forecast AUROC** | **0.821** (demographics + weather + twin state + personal bias) vs 0.723 baseline |
 | **Stack** | Python · FastAPI · React 19 · Docker Compose |
 | **Architecture** | [`docs/ThermoTwin_architecture.pdf`](docs/ThermoTwin_architecture.pdf) |
 | **Presentation** | [`docs/ThermoTwin_presentation.pdf`](docs/ThermoTwin_presentation.pdf) |
+
+## Key numbers at a glance
+
+| Metric | Value | Baseline / context |
+|---|---|---|
+| Danger minutes caught (beta-blocker) | **62%** | HR-only: 18% |
+| False-alarm rate | **8%** | ~1 unnecessary break per 12 h shift |
+| 60-min forecast AUROC | **0.821** | Weather-only: 0.53 |
+| Warned ≥ 30 min ahead | **33%** of episodes | Without personal learning: 17% |
+| Real-data ECTemp RMSE | **0.32 °C** | Published benchmark: ~0.3 °C |
+| Beta-blocker RMSE improvement | 0.63 → **0.39 °C** | 38% error reduction |
+| Validated on | 22 participants, 99 trials (PROSPIE, CC BY-NC 4.0) | |
+
+### 60-minute forecast ablation (what each layer adds)
+
+| Feature set | AUROC | Brier score | Warned ≥ 30 min early |
+|---|---|---|---|
+| Demographics only | 0.723 | 0.258 | 16.7% |
+| + Weather | 0.793 | 0.197 | 16.7% |
+| + Twin state (13 features) | 0.821 | 0.204 | 33.3% |
+| + Personal bias (full model) | 0.794 | **0.186** | 33.3% |
+
+Twin state gives the biggest AUROC jump; personal bias reduces the Brier score (better calibration).
 
 ## The idea in one paragraph
 

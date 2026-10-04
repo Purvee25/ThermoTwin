@@ -21,6 +21,7 @@ export default function App() {
   const [view, setView] = useState<View>('twin')
   const [minute, setMinute] = useState(DEFAULT_MINUTE)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [dangerOverride, setDangerOverride] = useState<number | null>(null)
   const meta = useQuery({ queryKey: ['meta'], queryFn: api.meta })
   const patients = useQuery({
     queryKey: ['patients', minute],
@@ -62,18 +63,46 @@ export default function App() {
         <ReviewScreen />
       ) : (
         <>
-          <label className="replay">
-            <span>Shift time</span>
-            <input
-              type="range"
-              min={SHIFT_START_MINUTE + 15}
-              max={SHIFT_END_MINUTE}
-              value={minute}
-              onChange={(e) => setMinute(Number(e.target.value))}
-              aria-label="Replay time"
-            />
-            <span className="clock">{minuteToClock(minute)}</span>
-          </label>
+          <div className="controls-bar">
+            <label className="replay">
+              <span>Shift time</span>
+              <input
+                type="range"
+                min={SHIFT_START_MINUTE + 15}
+                max={SHIFT_END_MINUTE}
+                value={minute}
+                onChange={(e) => setMinute(Number(e.target.value))}
+                aria-label="Replay time"
+              />
+              <span className="clock">{minuteToClock(minute)}</span>
+            </label>
+            {meta.data && (
+              <label className="threshold-control">
+                <span>Alert at</span>
+                <input
+                  type="range"
+                  min={37.5}
+                  max={39.0}
+                  step={0.1}
+                  value={dangerOverride ?? meta.data.danger_core_c}
+                  onChange={(e) => setDangerOverride(Number(e.target.value))}
+                  aria-label="Danger threshold"
+                />
+                <span className="clock threshold-value">
+                  {(dangerOverride ?? meta.data.danger_core_c).toFixed(1)} °C
+                  {dangerOverride !== null && dangerOverride !== meta.data.danger_core_c && (
+                    <button
+                      className="reset-btn"
+                      onClick={() => setDangerOverride(null)}
+                      title="Reset to default"
+                    >
+                      ↺
+                    </button>
+                  )}
+                </span>
+              </label>
+            )}
+          </div>
 
           {patients.isError && (
             <p className="panel notice error">
@@ -98,7 +127,7 @@ export default function App() {
 
             <section className="panel" aria-label="Patient twin">
               {active && meta.data ? (
-                <TwinView patient={active} minute={minute} dangerCoreC={meta.data.danger_core_c} />
+                <TwinView patient={active} minute={minute} dangerCoreC={dangerOverride ?? meta.data.danger_core_c} />
               ) : (
                 <p className="notice">Select a patient.</p>
               )}

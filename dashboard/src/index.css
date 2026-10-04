@@ -111,16 +111,80 @@ select {
   color: var(--danger);
 }
 
+.controls-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
 .replay {
   display: flex;
   gap: 12px;
   align-items: center;
   padding: 10px 14px;
-  margin-bottom: 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+
+.threshold-control {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.threshold-control input[type='range'] {
+  flex: 1;
+  accent-color: var(--danger);
+}
+
+.threshold-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reset-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 1rem;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.reset-btn:hover {
+  color: var(--text);
+}
+
+.shap-placeholder {
+  min-height: 80px;
+}
+
+.skeleton-bar {
+  height: 14px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  margin-bottom: 10px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-bar:nth-child(2) { width: 75%; animation-delay: 0.2s; }
+.skeleton-bar:nth-child(3) { width: 55%; animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 .replay input[type='range'] {

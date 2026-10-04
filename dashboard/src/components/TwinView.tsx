@@ -143,6 +143,10 @@ export function TwinView({ patient, minute, dangerCoreC }: Props) {
             <span className="hint-inline"> · green = with rest break</span>
           )}
         </h3>
+        <p className="hint">
+          Shaded band = 80% confidence interval (sized from real heat-trial error on PROSPIE).
+          Dashed red line = 38 °C danger threshold.
+        </p>
         <ResponsiveContainer width="100%" height={260}>
           <ComposedChart
             data={rows}
@@ -288,6 +292,18 @@ export function TwinView({ patient, minute, dangerCoreC }: Props) {
         onReset={() => whatIf.reset()}
       />
 
+      {minute === 0 && (
+        <div className="chart-card shap-placeholder">
+          <h3>Why is this patient at risk?</h3>
+          <p className="hint">Move the shift-time slider to a later time to see SHAP feature attribution for the 60-min forecast.</p>
+        </div>
+      )}
+      {minute > 0 && !explain.data && !explain.isError && (
+        <div className="chart-card shap-placeholder">
+          <h3>Why is this patient at risk?</h3>
+          <div className="skeleton-bar" /><div className="skeleton-bar" /><div className="skeleton-bar" />
+        </div>
+      )}
       {explain.data && explain.data.top_features.length > 0 && (
         <div className="chart-card">
           <h3>Why is this patient at risk?</h3>
